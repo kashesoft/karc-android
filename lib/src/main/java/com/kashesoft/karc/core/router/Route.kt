@@ -28,6 +28,12 @@ class Route(private val router: Router) {
         router.route(this)
     }
 
+    fun path(path: String, params: Map<String, Any> = mapOf()): Route {
+        val query = Query(path, params)
+        queries.add(query)
+        return this
+    }
+
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.PRESENTER_SET_UP,

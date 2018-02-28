@@ -27,6 +27,10 @@ open class Router : Logging {
         routes.clear()
     }
 
+    fun path(path: String, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).path(path, params)
+    }
+
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         return Route(this).setUpPresenter(presenterClass, params)
     }
