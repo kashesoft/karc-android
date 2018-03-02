@@ -4,11 +4,17 @@
 
 package com.kashesoft.karc.core.router
 
+import android.os.Handler
+import android.os.Looper
 import com.kashesoft.karc.utils.Logging
 import java.util.*
 import kotlin.reflect.KClass
 
 open class Router : Logging {
+
+    companion object {
+        const val DEFAULT_ROUTE_DISMISS_DELAY = 2000L
+    }
 
     private val routables: MutableList<Routable> = mutableListOf()
     private val routes: Queue<Route> = ArrayDeque()
@@ -23,6 +29,7 @@ open class Router : Logging {
         routables.remove(routable)
     }
 
+    @Synchronized
     fun clear() {
         routes.clear()
     }
@@ -55,6 +62,7 @@ open class Router : Logging {
         return Route(this).showFragmentInContainer(fragmentClass, fragmentContainer, params)
     }
 
+    @Synchronized
     internal fun route(route: Route) {
         val query = route.currentQuery() ?: return
         val routed = routables.any { it.route(query) }
@@ -64,9 +72,11 @@ open class Router : Logging {
         }
         if (route.isNotFinished()) {
             routes.offer(route)
+            dismissRouteIfNeededAfterDelay(route, DEFAULT_ROUTE_DISMISS_DELAY)
         }
     }
 
+    @Synchronized
     internal fun paramsForComponent(componentClass: KClass<*>): Map<String, Any> {
         val query: Query = currentQueries.firstOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
         currentQueries.remove(query)
@@ -76,12 +86,26 @@ open class Router : Logging {
         return params.toMap()
     }
 
+    @Synchronized
     private fun dispatchRoutes() {
         val remainingRoutes = ArrayDeque(routes)
         routes.clear()
         while (remainingRoutes.size > 0) {
             val route = remainingRoutes.remove()
             route(route)
+        }
+    }
+
+    private fun dismissRouteIfNeededAfterDelay(route: Route, delay: Long) {
+        Handler(Looper.getMainLooper()).postDelayed({
+            dismissRouteIfNeeded(route)
+        }, delay)
+    }
+
+    @Synchronized
+    private fun dismissRouteIfNeeded(route: Route) {
+        if (routes.contains(route)) {
+            routes.remove(route)
         }
     }
 
