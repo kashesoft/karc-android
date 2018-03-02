@@ -5,9 +5,14 @@
 package com.kashesoft.karcsample.app.user.activities
 
 import android.support.design.widget.BottomNavigationView
+import android.widget.Toast
 import com.kashesoft.karc.app.Activity
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karcsample.R
+import com.kashesoft.karcsample.app.data.controllers.AbcController
+import com.kashesoft.karcsample.app.data.controllers.XyzController
+import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
+import com.kashesoft.karcsample.app.domain.presenters.XyzPresenter
 import com.kashesoft.karcsample.app.domain.routers.MainRouter
 import com.kashesoft.karcsample.app.user.fragments.FirstFragment
 import com.kashesoft.karcsample.app.user.fragments.SecondFragment
@@ -33,6 +38,19 @@ class DetailsActivity : Activity<Nothing, MainRouter>() {
             }
             false
         })
+        application.controller(AbcController::class)?.let {
+            Toast.makeText(this, "Detected $it", Toast.LENGTH_SHORT).show()
+        }
+        application.controller(XyzController::class)?.let {
+            Toast.makeText(this, "Detected $it", Toast.LENGTH_SHORT).show()
+        }
+        application.presenter(AbcPresenter::class)?.let {
+            Toast.makeText(this, "Detected $it", Toast.LENGTH_SHORT).show()
+        }
+        application.presenter(XyzPresenter::class)?.let {
+            Toast.makeText(this, "Detected $it", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
 }

@@ -138,7 +138,15 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     private val controllers: MutableList<Controller> = mutableListOf()
 
     protected inline fun <reified C : Controller> setControllerProvider(controllerProvider: Provider<C>) {
+        @Suppress("UNCHECKED_CAST")
         this.controllerProviders[C::class] = controllerProvider as Provider<Controller>
+    }
+
+    fun <P : Controller> controller(controllerClass: KClass<P>): P? {
+        @Suppress("UNCHECKED_CAST")
+        return controllers.firstOrNull {
+            it::class.isSubclassOf(controllerClass)
+        } as? P
     }
 
     fun setUpController(controllerClass: KClass<*>, params: Map<String, Any>) {
@@ -178,7 +186,15 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     internal val presenters: MutableList<Presenter> = mutableListOf()
 
     protected inline fun <reified P : Presenter> setPresenterProvider(presenterProvider: Provider<P>) {
+        @Suppress("UNCHECKED_CAST")
         this.presenterProviders[P::class] = presenterProvider as Provider<Presenter>
+    }
+
+    fun <P : Presenter> presenter(presenterClass: KClass<P>): P? {
+        @Suppress("UNCHECKED_CAST")
+        return presenters.firstOrNull {
+            it::class.isSubclassOf(presenterClass)
+        } as? P
     }
 
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any>) {
