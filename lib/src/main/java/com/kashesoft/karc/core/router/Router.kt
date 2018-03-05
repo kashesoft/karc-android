@@ -13,12 +13,13 @@ import kotlin.reflect.KClass
 open class Router : Logging {
 
     companion object {
-        const val DEFAULT_ROUTE_DISMISS_DELAY = 2000L
+        const val DEFAULT_ROUTED_QUERY_DISMISS_DELAY = 2000L
+        const val DEFAULT_REMAINING_ROUTE_DISMISS_DELAY = 2000L
     }
 
     private val routables: MutableList<Routable> = mutableListOf()
-    private val routes: Queue<Route> = ArrayDeque()
-    private var currentQueries = mutableListOf<Query>()
+    private val remainingRoutes: Queue<Route> = ArrayDeque()
+    private var routedQueries = mutableListOf<Query>()
 
     fun attachRoutable(routable: Routable) {
         routables.add(routable)
@@ -31,7 +32,7 @@ open class Router : Logging {
 
     @Synchronized
     fun clear() {
-        routes.clear()
+        remainingRoutes.clear()
     }
 
     fun path(path: String, params: Map<String, Any> = mapOf()): Route {
@@ -64,21 +65,22 @@ open class Router : Logging {
 
     @Synchronized
     internal fun route(route: Route) {
-        val query = route.currentQuery() ?: return
+        var query = route.currentQuery() ?: return
         while (routables.any { it.route(query) }) {
-            route.next()
-            currentQueries.add(query)
+            routedQueries.add(query)
+            dismissRoutedQueryIfNeededAfterDelay(query, DEFAULT_ROUTED_QUERY_DISMISS_DELAY)
+            query = route.nextQuery() ?: return
         }
         if (route.isNotFinished()) {
-            routes.offer(route)
-            dismissRouteIfNeededAfterDelay(route, DEFAULT_ROUTE_DISMISS_DELAY)
+            remainingRoutes.offer(route)
+            dismissRemainingRouteIfNeededAfterDelay(route, DEFAULT_REMAINING_ROUTE_DISMISS_DELAY)
         }
     }
 
     @Synchronized
     internal fun paramsForComponent(componentClass: KClass<*>): Map<String, Any> {
-        val query: Query = currentQueries.firstOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
-        currentQueries.remove(query)
+        val query: Query = routedQueries.firstOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
+        routedQueries.remove(query)
         val params = query.params.toMutableMap()
         params.remove(Route.Param.COMPONENT_CLASS)
         params.remove(Route.Param.FRAGMENT_CONTAINER)
@@ -87,24 +89,37 @@ open class Router : Logging {
 
     @Synchronized
     private fun dispatchRoutes() {
-        val remainingRoutes = ArrayDeque(routes)
-        routes.clear()
-        while (remainingRoutes.size > 0) {
-            val route = remainingRoutes.remove()
+        val routes = ArrayDeque(remainingRoutes)
+        remainingRoutes.clear()
+        while (routes.size > 0) {
+            val route = routes.remove()
             route(route)
         }
     }
 
-    private fun dismissRouteIfNeededAfterDelay(route: Route, delay: Long) {
+    private fun dismissRoutedQueryIfNeededAfterDelay(routedQuery: Query, delay: Long) {
         Handler(Looper.getMainLooper()).postDelayed({
-            dismissRouteIfNeeded(route)
+            dismissRoutedQueryIfNeeded(routedQuery)
         }, delay)
     }
 
     @Synchronized
-    private fun dismissRouteIfNeeded(route: Route) {
-        if (routes.contains(route)) {
-            routes.remove(route)
+    private fun dismissRoutedQueryIfNeeded(routedQuery: Query) {
+        if (routedQueries.contains(routedQuery)) {
+            routedQueries.remove(routedQuery)
+        }
+    }
+
+    private fun dismissRemainingRouteIfNeededAfterDelay(remainingRoute: Route, delay: Long) {
+        Handler(Looper.getMainLooper()).postDelayed({
+            dismissRemainingRouteIfNeeded(remainingRoute)
+        }, delay)
+    }
+
+    @Synchronized
+    private fun dismissRemainingRouteIfNeeded(remainingRoute: Route) {
+        if (remainingRoutes.contains(remainingRoute)) {
+            remainingRoutes.remove(remainingRoute)
         }
     }
 

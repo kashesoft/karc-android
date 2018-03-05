@@ -91,10 +91,10 @@ class Route(private val router: Router) {
         return this
     }
 
-    internal fun next(): Boolean {
+    internal fun nextQuery(): Query? {
         if (queries.isNotEmpty()) {
             queries.removeAt(0)
-            return true
+            return queries.firstOrNull()
         } else {
             throw IllegalStateException("Route is over!")
         }
