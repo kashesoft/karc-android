@@ -65,8 +65,7 @@ open class Router : Logging {
     @Synchronized
     internal fun route(route: Route) {
         val query = route.currentQuery() ?: return
-        val routed = routables.any { it.route(query) }
-        if (routed) {
+        while (routables.any { it.route(query) }) {
             route.next()
             currentQueries.add(query)
         }
