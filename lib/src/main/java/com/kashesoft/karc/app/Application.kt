@@ -154,6 +154,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         val controllerProvider = controllerProviders.toList().firstOrNull { it.first == controllerClass }?.second
         val controller = if (controllerProvider != null) controllerProvider.get() else controllerClass.createInstance() as Controller
         controller.application = this
+        controllers.add(controller)
         controller.doSetUp(params)
         if (inForeground) {
             controller.doEnterForeground()
@@ -161,7 +162,6 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (isActive) {
             controller.doBecomeActive()
         }
-        controllers.add(controller)
     }
 
     fun tearDownController(controllerClass: KClass<*>) {
@@ -201,6 +201,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (presenters.any { it::class.isSubclassOf(presenterClass) }) return
         val presenterProvider = presenterProviders.toList().firstOrNull { it.first == presenterClass }?.second
         val presenter = if (presenterProvider != null) presenterProvider.get() else presenterClass.createInstance() as Presenter
+        presenters.add(presenter)
         presenter.doSetUp(params)
         if (inForeground) {
             presenter.doEnterForeground()
@@ -208,7 +209,6 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (isActive) {
             presenter.doBecomeActive()
         }
-        presenters.add(presenter)
     }
 
     fun tearDownPresenter(presenterClass: KClass<*>) {
