@@ -32,10 +32,6 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     private val viewModel: ViewModel<P>
         get() = ViewModelProviders.of(this).get(ViewModel::class.java) as ViewModel<P>
 
-    override fun getView(): View {
-        return super.getView()!!
-    }
-
     protected open val logging = false
 
     private fun log(message: String) {
@@ -110,9 +106,9 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     }
 
     private fun listenLayout() {
-        view.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
+        view?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
-                view.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                view?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
                 onLayout()
             }
         })
@@ -125,7 +121,7 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
 
     private fun onLayout() {
         layoutIsCompleted = true
-        if (logging) log("viewDidLayout: (view.width = ${view.width}, view.height = ${view.height})")
+        if (logging) log("viewDidLayout: (view.width = ${view!!.width}, view.height = ${view!!.height})")
         viewDidLayout()
         if (isResumed) {
             becomeActive()
