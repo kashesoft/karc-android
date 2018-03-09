@@ -229,6 +229,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
         val fragmentTransaction = supportFragmentManager.beginTransaction()
 
+        // Remove previous fragment in container
         supportFragmentManager.fragments
                 .filter { it.activity == this && (it.view?.parent as? ViewGroup)?.id == containerViewId }
                 .forEach { fragmentTransaction.remove(it) }
