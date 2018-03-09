@@ -12,6 +12,7 @@ import android.support.annotation.CallSuper
 import android.support.annotation.IdRes
 import android.util.Log
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
@@ -226,8 +227,13 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
         val fragment = fragmentClass.createInstance()
 
-        supportFragmentManager
-                .beginTransaction()
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+
+        supportFragmentManager.fragments
+                .filter { it.activity == this && (it.view?.parent as? ViewGroup)?.id == containerViewId }
+                .forEach { fragmentTransaction.remove(it) }
+
+        fragmentTransaction
                 .setCustomAnimations(enterAnimation, exitAnimation)
                 .replace(containerViewId, fragment, fragmentTag)
                 .commitAllowingStateLoss()
