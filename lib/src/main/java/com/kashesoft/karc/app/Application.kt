@@ -13,6 +13,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.util.Log
+import com.kashesoft.karc.core.interactor.Interactor
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
@@ -156,6 +157,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         controller.application = this
         controllers.add(controller)
         controller.doSetUp(params)
+        Interactor.registerGateway(controller)
         if (inForeground) {
             controller.doEnterForeground()
         }
@@ -174,6 +176,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (inForeground) {
             controller.doEnterBackground()
         }
+        Interactor.unregisterGateway(controller)
         controller.doTearDown()
         controllers.remove(controller)
     }

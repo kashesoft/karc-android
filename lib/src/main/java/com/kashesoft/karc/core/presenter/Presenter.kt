@@ -67,6 +67,7 @@ abstract class Presenter(
         if (logging) log("onTearDown")
         removeInteractionListener(this)
         onTearDown()
+        detachAllPresentable()
     }
 
     //endregion
@@ -112,6 +113,10 @@ abstract class Presenter(
         presentables.remove(presentable)
         if (logging) log("onPresentableDetached: $presentable")
         onPresentableDetached(presentable)
+    }
+
+    private fun detachAllPresentable() {
+        presentables.toList().forEach { detachPresentable(it) }
     }
 
     open fun <V : Presentable> onPresentableAttached(presentable: V) {}

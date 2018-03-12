@@ -9,24 +9,53 @@ import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 abstract class Interactor : Logging {
+
+    companion object {
+
+        private val gateways: MutableSet<Gateway> = mutableSetOf()
+
+        @Synchronized
+        fun <G : Gateway> getGateway(gatewayClass: KClass<G>): G? {
+            @Suppress("UNCHECKED_CAST")
+            return gateways.firstOrNull {
+                it::class.isSubclassOf(gatewayClass)
+            } as? G
+        }
+
+        @Synchronized
+        fun registerGateway(gateway: Gateway) {
+            gateways.add(gateway)
+        }
+
+        @Synchronized
+        fun unregisterGateway(gateway: Gateway) {
+            gateways.remove(gateway)
+        }
+
+    }
 
     private val interactions: MutableList<Interaction<*>> = mutableListOf()
     private val listeners: MutableList<InteractionListener<Any?>> = mutableListOf()
 
-    fun <R> start(
-            observableGenerator: () -> Observable<R>,
-            onNext: ((output: R) -> Unit)? = null,
-            onComplete: (() -> Unit)? = null,
-            onError: ((error: Throwable) -> Unit)? = null,
+    inline fun <reified G : Gateway, R> start(
+            crossinline observableGenerator: (G) -> Observable<R>,
+            noinline onNext: ((output: R) -> Unit)? = null,
+            noinline onComplete: (() -> Unit)? = null,
+            noinline onError: ((error: Throwable) -> Unit)? = null,
             observableScheduler: Scheduler = Schedulers.io(),
             observerScheduler: Scheduler = AndroidSchedulers.mainThread(),
             vararg tags: String
     ) {
         Interaction(
                 this,
-                observableGenerator,
+                {
+                    val gateway = getGateway(G::class) ?: throw IllegalStateException("Gateway ${G::class} is not registered!")
+                    return@Interaction observableGenerator(gateway)
+                },
                 onNext,
                 onComplete,
                 onError,

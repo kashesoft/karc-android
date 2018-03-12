@@ -5,11 +5,12 @@
 package com.kashesoft.karc.app
 
 import android.util.Log
+import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Logging
 
-abstract class Controller : Logging, Presentable, Routable {
+abstract class Controller : Logging, Gateway, Presentable, Routable {
 
     override lateinit var application: Application<*>
         internal set
@@ -20,7 +21,7 @@ abstract class Controller : Logging, Presentable, Routable {
         Log.v(name, ":::::::::::::::$message:::::::::::::::")
     }
 
-//region <==========|Lifecycle|==========>
+    //region <==========|Lifecycle|==========>
 
     open fun onSetUp(params: Map<String, Any>) {}
 

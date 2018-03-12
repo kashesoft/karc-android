@@ -4,8 +4,6 @@
 
 package com.kashesoft.karcsample.app.domain
 
-import com.kashesoft.karcsample.app.domain.gateways.UserGateway
-import com.kashesoft.karcsample.app.domain.interactors.UserInteractor
 import com.kashesoft.karcsample.app.domain.presenters.*
 import com.kashesoft.karcsample.app.domain.routers.MainRouter
 import dagger.Module
@@ -23,26 +21,23 @@ class DomainModule {
 
     @Provides
     internal fun provideMainPresenter(
-            mainRouter: MainRouter,
-            userInteractor: UserInteractor
+            mainRouter: MainRouter
     ): MainPresenter {
-        return MainPresenter(mainRouter, userInteractor)
+        return MainPresenter(mainRouter)
     }
 
     @Provides
     internal fun provideFirstPresenter(
-            mainRouter: MainRouter,
-            userInteractor: UserInteractor
+            mainRouter: MainRouter
     ): FirstPresenter {
-        return FirstPresenter(mainRouter, userInteractor)
+        return FirstPresenter(mainRouter)
     }
 
     @Provides
     internal fun provideSecondPresenter(
-            mainRouter: MainRouter,
-            userInteractor: UserInteractor
+            mainRouter: MainRouter
     ): SecondPresenter {
-        return SecondPresenter(mainRouter, userInteractor)
+        return SecondPresenter(mainRouter)
     }
 
     @Provides
@@ -55,12 +50,6 @@ class DomainModule {
     internal fun provideXyzPresenter(
     ): XyzPresenter {
         return XyzPresenter()
-    }
-
-    @Provides
-    @Singleton
-    internal fun provideUserInteractor(userGateway: UserGateway): UserInteractor {
-        return UserInteractor(userGateway)
     }
 
 }

@@ -10,7 +10,7 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.observers.DisposableObserver
 import java.lang.ref.WeakReference
 
-class Interaction<R> internal constructor(
+class Interaction<R> constructor(
         interactor: Interactor,
         private val observableGenerator: () -> Observable<R>,
         private val onNext: ((output: R) -> Unit)?,

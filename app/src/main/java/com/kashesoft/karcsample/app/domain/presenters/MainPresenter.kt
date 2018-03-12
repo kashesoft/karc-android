@@ -12,5 +12,5 @@ import javax.inject.Inject
 class MainPresenter @Inject
 constructor(
         router: MainRouter,
-        private val userInteractor: UserInteractor
+        private val userInteractor: UserInteractor = UserInteractor()
 ) : UserPresenter(userInteractor)
