@@ -44,6 +44,9 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     private var inForeground = false
     private var isActive = false
 
+    val resumedActivity: Activity<*, *>?
+        get() = resumedActivityRef?.get()
+
     @CallSuper
     override fun onCreate() {
         if (logging) log("onCreate")
