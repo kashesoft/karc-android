@@ -13,6 +13,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.util.Log
+import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.interactor.Interactor
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
@@ -146,6 +147,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         this.controllerProviders[C::class] = controllerProvider as Provider<Controller>
     }
 
+    @Synchronized
     fun <P : Controller> controller(controllerClass: KClass<P>): P? {
         @Suppress("UNCHECKED_CAST")
         return controllers.firstOrNull {
@@ -153,6 +155,15 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         } as? P
     }
 
+    @Synchronized
+    fun <G : Gateway> gateway(gatewayClass: KClass<G>): G? {
+        @Suppress("UNCHECKED_CAST")
+        return controllers.firstOrNull {
+            it::class.isSubclassOf(gatewayClass)
+        } as? G
+    }
+
+    @Synchronized
     fun setUpController(controllerClass: KClass<*>, params: Map<String, Any>) {
         if (controllers.any { it::class.isSubclassOf(controllerClass) }) return
         val controllerProvider = controllerProviders.toList().firstOrNull { it.first == controllerClass }?.second
@@ -169,6 +180,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         }
     }
 
+    @Synchronized
     fun tearDownController(controllerClass: KClass<*>) {
         val controller = controllers.firstOrNull {
             it::class.isSubclassOf(controllerClass)
