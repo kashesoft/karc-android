@@ -17,7 +17,7 @@ class UserInteractor : Interactor() {
             onError: ((error: Throwable) -> Unit)? = null
     ) {
         start(
-                { userGateway: UserGateway -> userGateway.fetchUsers(userIds) },
+                { gateway(UserGateway::class)!!.fetchUsers(userIds) },
                 onNext = onNext,
                 onComplete = onComplete,
                 onError = onError
