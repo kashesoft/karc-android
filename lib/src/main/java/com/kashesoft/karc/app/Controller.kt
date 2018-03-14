@@ -4,6 +4,7 @@
 
 package com.kashesoft.karc.app
 
+import android.content.Context
 import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.presenter.Presentable
@@ -14,6 +15,9 @@ abstract class Controller : Logging, Gateway, Presentable, Routable {
 
     override lateinit var application: Application<*>
         internal set
+
+    protected val context: Context
+        get() = application.applicationContext
 
     protected open val logging = false
 
