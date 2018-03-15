@@ -65,7 +65,7 @@ abstract class Interactor : Logging {
     @Synchronized
     fun dispose(vararg tags: String) {
         if (tags.isEmpty()) {
-            interactions.forEach { it.dispose() }
+            interactions.toList().forEach { it.dispose() }
         } else {
             interactions.filter { it.tags.any { tags.contains(it) } }.forEach { it.dispose() }
         }
