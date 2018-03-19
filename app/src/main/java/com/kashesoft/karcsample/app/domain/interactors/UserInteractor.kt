@@ -5,8 +5,9 @@
 package com.kashesoft.karcsample.app.domain.interactors
 
 import com.kashesoft.karc.core.interactor.Interactor
+import com.kashesoft.karcsample.app.App
 import com.kashesoft.karcsample.app.domain.entities.User
-import com.kashesoft.karcsample.app.domain.gateways.UserGateway
+import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 
 class UserInteractor : Interactor() {
 
@@ -17,7 +18,7 @@ class UserInteractor : Interactor() {
             onError: ((error: Throwable) -> Unit)? = null
     ) {
         start(
-                { gateway(UserGateway::class)!!.fetchUsers(userIds) },
+                { App.Companion.instance.gateway(AbcGateway::class)!!.fetchUsers(userIds) },
                 onNext = onNext,
                 onComplete = onComplete,
                 onError = onError

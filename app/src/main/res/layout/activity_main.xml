@@ -20,42 +20,42 @@
         app:layout_constraintTop_toTopOf="parent"/>
 
     <Button
-        android:id="@+id/setUpAbcControllerButton"
+        android:id="@+id/setUpAbcGatewayButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/set_up_abc_controller"
+        android:text="@string/set_up_abc_gateway"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
-        android:id="@+id/tearDownAbcControllerButton"
+        android:id="@+id/tearDownAbcGatewayButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/tear_down_abc_controller"
-        app:layout_constraintTop_toBottomOf="@+id/setUpAbcControllerButton"
+        android:text="@string/tear_down_abc_gateway"
+        app:layout_constraintTop_toBottomOf="@+id/setUpAbcGatewayButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
-        android:id="@+id/setUpXyzControllerButton"
+        android:id="@+id/setUpXyzGatewayButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/set_up_xyz_controller"
-        app:layout_constraintTop_toBottomOf="@+id/tearDownAbcControllerButton"
+        android:text="@string/set_up_xyz_gateway"
+        app:layout_constraintTop_toBottomOf="@+id/tearDownAbcGatewayButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
     <Button
-        android:id="@+id/tearDownXyzControllerButton"
+        android:id="@+id/tearDownXyzGatewayButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="@string/tear_down_xyz_controller"
-        app:layout_constraintTop_toBottomOf="@+id/setUpXyzControllerButton"
+        android:text="@string/tear_down_xyz_gateway"
+        app:layout_constraintTop_toBottomOf="@+id/setUpXyzGatewayButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 
@@ -65,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:text="@string/set_up_abc_presenter"
-        app:layout_constraintTop_toBottomOf="@+id/tearDownXyzControllerButton"
+        app:layout_constraintTop_toBottomOf="@+id/tearDownXyzGatewayButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
 

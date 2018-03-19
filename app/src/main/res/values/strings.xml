@@ -7,10 +7,10 @@
     <string name="load_users">Load users</string>
     <string name="title_second">Second</string>
     <string name="next">Next</string>
-    <string name="set_up_abc_controller">Set up abc controller</string>
-    <string name="tear_down_abc_controller">Tear down abc controller</string>
-    <string name="set_up_xyz_controller">Set up xyz controller</string>
-    <string name="tear_down_xyz_controller">Tear down xyz controller</string>
+    <string name="set_up_abc_gateway">Set up abc gateway</string>
+    <string name="tear_down_abc_gateway">Tear down abc gateway</string>
+    <string name="set_up_xyz_gateway">Set up xyz gateway</string>
+    <string name="tear_down_xyz_gateway">Tear down xyz gateway</string>
     <string name="set_up_abc_presenter">Set up abc presenter</string>
     <string name="tear_down_abc_presenter">Tear down abc presenter</string>
     <string name="set_up_xyz_presenter">Set up xyz presenter</string>

@@ -9,34 +9,8 @@ import io.reactivex.Observable
 import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
-import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 abstract class Interactor : Logging {
-
-    companion object {
-
-        private val gateways: MutableSet<Gateway> = mutableSetOf()
-
-        @Synchronized
-        fun <G : Gateway> gateway(gatewayClass: KClass<G>): G? {
-            @Suppress("UNCHECKED_CAST")
-            return gateways.firstOrNull {
-                it::class.isSubclassOf(gatewayClass)
-            } as? G
-        }
-
-        @Synchronized
-        fun registerGateway(gateway: Gateway) {
-            gateways.add(gateway)
-        }
-
-        @Synchronized
-        fun unregisterGateway(gateway: Gateway) {
-            gateways.remove(gateway)
-        }
-
-    }
 
     private val interactions: MutableList<Interaction<*>> = mutableListOf()
     private val listeners: MutableList<InteractionListener<Any?>> = mutableListOf()

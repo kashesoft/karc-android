@@ -4,20 +4,12 @@
 
 package com.kashesoft.karc.app
 
-import android.content.Context
 import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
-import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Logging
 
-abstract class Controller : Logging, Gateway, Presentable, Routable {
-
-    override lateinit var application: Application<*>
-        internal set
-
-    protected val context: Context
-        get() = application.applicationContext
+abstract class Controller : Logging, Gateway, Routable {
 
     protected open val logging = false
 
@@ -39,32 +31,32 @@ abstract class Controller : Logging, Gateway, Presentable, Routable {
 
     open fun onTearDown() {}
 
-    internal fun doSetUp(params: Map<String, Any>) {
+    override fun doSetUp(params: Map<String, Any>) {
         if (logging) log("onSetUp: params = $params")
         onSetUp(params)
     }
 
-    internal fun doEnterForeground() {
+    override fun doEnterForeground() {
         if (logging) log("onEnterForeground")
         onEnterForeground()
     }
 
-    internal fun doBecomeActive() {
+    override fun doBecomeActive() {
         if (logging) log("onBecomeActive")
         onBecomeActive()
     }
 
-    internal fun doBecomeInactive() {
+    override fun doBecomeInactive() {
         if (logging) log("onBecomeInactive")
         onBecomeInactive()
     }
 
-    internal fun doEnterBackground() {
+    override fun doEnterBackground() {
         if (logging) log("onEnterBackground")
         onEnterBackground()
     }
 
-    internal fun doTearDown() {
+    override fun doTearDown() {
         if (logging) log("onTearDown")
         onTearDown()
     }

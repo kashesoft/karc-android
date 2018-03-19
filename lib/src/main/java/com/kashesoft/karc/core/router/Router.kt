@@ -47,12 +47,12 @@ open class Router : Logging {
         return Route(this).tearDownPresenter(presenterClass)
     }
 
-    fun setUpController(controllerClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).setUpController(controllerClass, params)
+    fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).setUpGateway(gatewayClass, params)
     }
 
-    fun tearDownController(controllerClass: KClass<*>): Route {
-        return Route(this).tearDownController(controllerClass)
+    fun tearDownGateway(gatewayClass: KClass<*>): Route {
+        return Route(this).tearDownGateway(gatewayClass)
     }
 
     fun showActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {

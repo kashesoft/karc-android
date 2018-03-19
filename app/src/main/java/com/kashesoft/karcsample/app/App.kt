@@ -6,8 +6,8 @@ package com.kashesoft.karcsample.app
 
 import com.kashesoft.karc.app.Application
 import com.kashesoft.karc.core.router.Routable
-import com.kashesoft.karcsample.app.data.controllers.AbcController
-import com.kashesoft.karcsample.app.data.controllers.XyzController
+import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
+import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
 import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
 import com.kashesoft.karcsample.app.domain.presenters.XyzPresenter
 import com.kashesoft.karcsample.app.domain.routers.MainRouter
@@ -24,16 +24,16 @@ class App : Application<MainRouter>(), Routable {
     lateinit var appComponent: AppComponent
 
     @Inject override lateinit var router: MainRouter
-    @Inject lateinit var abcControllerProvider: Provider<AbcController>
-    @Inject lateinit var xyzControllerProvider: Provider<XyzController>
+    @Inject lateinit var abcGatewayProvider: Provider<AbcGateway>
+    @Inject lateinit var xyzGatewayProvider: Provider<XyzGateway>
     @Inject lateinit var abcPresenterProvider: Provider<AbcPresenter>
     @Inject lateinit var xyzPresenterProvider: Provider<XyzPresenter>
 
     override fun onCreate() {
         instance = this
         super.onCreate()
-        setControllerProvider(abcControllerProvider)
-        setControllerProvider(xyzControllerProvider)
+        setGatewayProvider(abcGatewayProvider)
+        setGatewayProvider(xyzGatewayProvider)
         setPresenterProvider(abcPresenterProvider)
         setPresenterProvider(xyzPresenterProvider)
     }

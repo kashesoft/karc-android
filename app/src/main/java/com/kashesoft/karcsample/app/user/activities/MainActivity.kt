@@ -8,8 +8,8 @@ import android.app.ProgressDialog
 import com.kashesoft.karc.app.Activity
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karcsample.R
-import com.kashesoft.karcsample.app.data.controllers.AbcController
-import com.kashesoft.karcsample.app.data.controllers.XyzController
+import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
+import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
 import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
 import com.kashesoft.karcsample.app.domain.presenters.MainPresenter
 import com.kashesoft.karcsample.app.domain.presenters.XyzPresenter
@@ -30,20 +30,20 @@ class MainActivity : Activity<MainPresenter, MainRouter>(), UserPresenter.View {
 
     override fun viewDidLoad() {
         //
-        setUpAbcControllerButton.setOnClickListener {
-            router.setUpController(AbcController::class, mapOf("string" to "test string")).route()
+        setUpAbcGatewayButton.setOnClickListener {
+            router.setUpGateway(AbcGateway::class, mapOf("string" to "test string")).route()
         }
         //
-        tearDownAbcControllerButton.setOnClickListener {
-            router.tearDownController(AbcController::class).route()
+        tearDownAbcGatewayButton.setOnClickListener {
+            router.tearDownGateway(AbcGateway::class).route()
         }
         //
-        setUpXyzControllerButton.setOnClickListener {
-            router.setUpController(XyzController::class, mapOf("string" to "test string")).route()
+        setUpXyzGatewayButton.setOnClickListener {
+            router.setUpGateway(XyzGateway::class, mapOf("string" to "test string")).route()
         }
         //
-        tearDownXyzControllerButton.setOnClickListener {
-            router.tearDownController(XyzController::class).route()
+        tearDownXyzGatewayButton.setOnClickListener {
+            router.tearDownGateway(XyzGateway::class).route()
         }
         //
         setUpAbcPresenterButton.setOnClickListener {

@@ -14,7 +14,6 @@ import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
-import com.kashesoft.karc.core.interactor.Interactor
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
@@ -62,7 +61,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStart() {
         if (logging) log("onStart")
         inForeground = true
-        controllers.forEach { it.doEnterForeground() }
+        gateways.forEach { it.doEnterForeground() }
         presenters.forEach { it.doEnterForeground() }
     }
 
@@ -71,7 +70,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onResume() {
         if (logging) log("onResume")
         isActive = true
-        controllers.forEach { it.doBecomeActive() }
+        gateways.forEach { it.doBecomeActive() }
         presenters.forEach { it.doBecomeActive() }
     }
 
@@ -80,7 +79,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onPause() {
         if (logging) log("onPause")
         isActive = false
-        controllers.forEach { it.doBecomeInactive() }
+        gateways.forEach { it.doBecomeInactive() }
         presenters.forEach { it.doBecomeInactive() }
     }
 
@@ -89,7 +88,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStop() {
         if (logging) log("onStop")
         inForeground = false
-        controllers.forEach { it.doEnterBackground() }
+        gateways.forEach { it.doEnterBackground() }
         presenters.forEach { it.doEnterBackground() }
         val stoppedActivity = stoppedActivityRef?.get() ?: return
         stoppedActivityRef?.clear()
@@ -137,63 +136,52 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     //endregion
 
-    //region <==========|Controllers|==========>
+    //region <==========|Gateways|==========>
 
-    protected val controllerProviders: MutableMap<KClass<*>, Provider<Controller>> = mutableMapOf()
-    private val controllers: MutableList<Controller> = mutableListOf()
+    protected val gatewayProviders: MutableMap<KClass<*>, Provider<Gateway>> = mutableMapOf()
+    private val gateways: MutableList<Gateway> = mutableListOf()
 
-    protected inline fun <reified C : Controller> setControllerProvider(controllerProvider: Provider<C>) {
+    protected inline fun <reified G : Gateway> setGatewayProvider(gatewayProvider: Provider<G>) {
         @Suppress("UNCHECKED_CAST")
-        this.controllerProviders[C::class] = controllerProvider as Provider<Controller>
-    }
-
-    @Synchronized
-    fun <P : Controller> controller(controllerClass: KClass<P>): P? {
-        @Suppress("UNCHECKED_CAST")
-        return controllers.firstOrNull {
-            it::class.isSubclassOf(controllerClass)
-        } as? P
+        this.gatewayProviders[G::class] = gatewayProvider as Provider<Gateway>
     }
 
     @Synchronized
     fun <G : Gateway> gateway(gatewayClass: KClass<G>): G? {
         @Suppress("UNCHECKED_CAST")
-        return controllers.firstOrNull {
+        return gateways.firstOrNull {
             it::class.isSubclassOf(gatewayClass)
         } as? G
     }
 
     @Synchronized
-    fun setUpController(controllerClass: KClass<*>, params: Map<String, Any>) {
-        if (controllers.any { it::class.isSubclassOf(controllerClass) }) return
-        val controllerProvider = controllerProviders.toList().firstOrNull { it.first == controllerClass }?.second
-        val controller = if (controllerProvider != null) controllerProvider.get() else controllerClass.createInstance() as Controller
-        controller.application = this
-        controllers.add(controller)
-        controller.doSetUp(params)
-        Interactor.registerGateway(controller)
+    fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any>) {
+        if (gateways.any { it::class.isSubclassOf(gatewayClass) }) return
+        val gatewayProvider = gatewayProviders.toList().firstOrNull { it.first == gatewayClass }?.second
+        val gateway = if (gatewayProvider != null) gatewayProvider.get() else gatewayClass.createInstance() as Gateway
+        gateways.add(gateway)
+        gateway.doSetUp(params)
         if (inForeground) {
-            controller.doEnterForeground()
+            gateway.doEnterForeground()
         }
         if (isActive) {
-            controller.doBecomeActive()
+            gateway.doBecomeActive()
         }
     }
 
     @Synchronized
-    fun tearDownController(controllerClass: KClass<*>) {
-        val controller = controllers.firstOrNull {
-            it::class.isSubclassOf(controllerClass)
+    fun tearDownGateway(gatewayClass: KClass<*>) {
+        val gateway = gateways.firstOrNull {
+            it::class.isSubclassOf(gatewayClass)
         } ?: return
         if (isActive) {
-            controller.doBecomeInactive()
+            gateway.doBecomeInactive()
         }
         if (inForeground) {
-            controller.doEnterBackground()
+            gateway.doEnterBackground()
         }
-        Interactor.unregisterGateway(controller)
-        controller.doTearDown()
-        controllers.remove(controller)
+        gateway.doTearDown()
+        gateways.remove(gateway)
     }
 
     //endregion
@@ -262,14 +250,14 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 tearDownPresenter(presenterClass)
                 true
             }
-            Route.Path.CONTROLLER_SET_UP -> {
-                val controllerClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                setUpController(controllerClass, query.params)
+            Route.Path.GATEWAY_SET_UP -> {
+                val gatewayClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
+                setUpGateway(gatewayClass, query.params)
                 true
             }
-            Route.Path.CONTROLLER_TEAR_DOWN -> {
-                val controllerClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                tearDownController(controllerClass)
+            Route.Path.GATEWAY_TEAR_DOWN -> {
+                val gatewayClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
+                tearDownGateway(gatewayClass)
                 true
             }
             Route.Path.ACTIVITY_SHOW -> {

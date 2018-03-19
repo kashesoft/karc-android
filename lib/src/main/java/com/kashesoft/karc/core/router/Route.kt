@@ -11,8 +11,8 @@ class Route(private val router: Router) {
     object Path {
         const val PRESENTER_SET_UP = "/presenter?set_up"
         const val PRESENTER_TEAR_DOWN = "/presenter?tear_down"
-        const val CONTROLLER_SET_UP = "/controller?set_up"
-        const val CONTROLLER_TEAR_DOWN = "/controller?tear_down"
+        const val GATEWAY_SET_UP = "/gateway?set_up"
+        const val GATEWAY_TEAR_DOWN = "/gateway?tear_down"
         const val ACTIVITY_SHOW = "/activity?show"
         const val FRAGMENT_SHOW_IN_CONTAINER = "/fragment?show_in_container"
     }
@@ -52,19 +52,19 @@ class Route(private val router: Router) {
         return this
     }
 
-    fun setUpController(controllerClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.CONTROLLER_SET_UP,
-                params + mutableMapOf(Route.Param.COMPONENT_CLASS to controllerClass)
+                Route.Path.GATEWAY_SET_UP,
+                params + mutableMapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
         )
         queries.add(query)
         return this
     }
 
-    fun tearDownController(controllerClass: KClass<*>): Route {
+    fun tearDownGateway(gatewayClass: KClass<*>): Route {
         val query = Query(
-                Route.Path.CONTROLLER_TEAR_DOWN,
-                mutableMapOf(Route.Param.COMPONENT_CLASS to controllerClass)
+                Route.Path.GATEWAY_TEAR_DOWN,
+                mutableMapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
         )
         queries.add(query)
         return this

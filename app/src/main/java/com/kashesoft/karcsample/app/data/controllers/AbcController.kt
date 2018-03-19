@@ -6,10 +6,10 @@ package com.kashesoft.karcsample.app.data.controllers
 
 import com.kashesoft.karc.app.Controller
 import com.kashesoft.karcsample.app.domain.entities.User
-import com.kashesoft.karcsample.app.domain.gateways.UserGateway
+import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 import io.reactivex.Observable
 
-class AbcController : Controller(), UserGateway {
+class AbcController : Controller(), AbcGateway {
 
     override val logging = true
 
