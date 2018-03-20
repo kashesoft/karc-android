@@ -61,8 +61,18 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStart() {
         if (logging) log("onStart")
         inForeground = true
-        gateways.asSequence().forEach { it.doEnterForeground() }
-        presenters.asSequence().forEach { it.doEnterForeground() }
+
+        val gi = gateways.listIterator()
+        while (gi.hasNext()) {
+            val gateway = gi.next()
+            gateway.doEnterForeground()
+        }
+
+        val pi = presenters.listIterator()
+        while (pi.hasNext()) {
+            val presenter = pi.next()
+            presenter.doEnterForeground()
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -70,8 +80,18 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onResume() {
         if (logging) log("onResume")
         isActive = true
-        gateways.asSequence().forEach { it.doBecomeActive() }
-        presenters.asSequence().forEach { it.doBecomeActive() }
+
+        val gi = gateways.listIterator()
+        while (gi.hasNext()) {
+            val gateway = gi.next()
+            gateway.doBecomeActive()
+        }
+
+        val pi = presenters.listIterator()
+        while (pi.hasNext()) {
+            val presenter = pi.next()
+            presenter.doBecomeActive()
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -79,8 +99,18 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onPause() {
         if (logging) log("onPause")
         isActive = false
-        gateways.asSequence().forEach { it.doBecomeInactive() }
-        presenters.asSequence().forEach { it.doBecomeInactive() }
+
+        val gi = gateways.listIterator()
+        while (gi.hasNext()) {
+            val gateway = gi.next()
+            gateway.doBecomeInactive()
+        }
+
+        val pi = presenters.listIterator()
+        while (pi.hasNext()) {
+            val presenter = pi.next()
+            presenter.doBecomeInactive()
+        }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -88,8 +118,19 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStop() {
         if (logging) log("onStop")
         inForeground = false
-        gateways.asSequence().forEach { it.doEnterBackground() }
-        presenters.asSequence().forEach { it.doEnterBackground() }
+
+        val gi = gateways.listIterator()
+        while (gi.hasNext()) {
+            val gateway = gi.next()
+            gateway.doEnterBackground()
+        }
+
+        val pi = presenters.listIterator()
+        while (pi.hasNext()) {
+            val presenter = pi.next()
+            presenter.doEnterBackground()
+        }
+
         val stoppedActivity = stoppedActivityRef?.get() ?: return
         stoppedActivityRef?.clear()
         stoppedActivityRef = null
