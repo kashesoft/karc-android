@@ -61,8 +61,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStart() {
         if (logging) log("onStart")
         inForeground = true
-        gateways.toList().forEach { it.doEnterForeground() }
-        presenters.toList().forEach { it.doEnterForeground() }
+        gateways.asSequence().forEach { it.doEnterForeground() }
+        presenters.asSequence().forEach { it.doEnterForeground() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -70,8 +70,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onResume() {
         if (logging) log("onResume")
         isActive = true
-        gateways.toList().forEach { it.doBecomeActive() }
-        presenters.toList().forEach { it.doBecomeActive() }
+        gateways.asSequence().forEach { it.doBecomeActive() }
+        presenters.asSequence().forEach { it.doBecomeActive() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -79,8 +79,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onPause() {
         if (logging) log("onPause")
         isActive = false
-        gateways.toList().forEach { it.doBecomeInactive() }
-        presenters.toList().forEach { it.doBecomeInactive() }
+        gateways.asSequence().forEach { it.doBecomeInactive() }
+        presenters.asSequence().forEach { it.doBecomeInactive() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -88,8 +88,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStop() {
         if (logging) log("onStop")
         inForeground = false
-        gateways.toList().forEach { it.doEnterBackground() }
-        presenters.toList().forEach { it.doEnterBackground() }
+        gateways.asSequence().forEach { it.doEnterBackground() }
+        presenters.asSequence().forEach { it.doEnterBackground() }
         val stoppedActivity = stoppedActivityRef?.get() ?: return
         stoppedActivityRef?.clear()
         stoppedActivityRef = null
