@@ -189,13 +189,19 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     //region <==========|Presenters|==========>
 
     protected val presenterProviders: MutableMap<KClass<*>, Provider<Presenter>> = mutableMapOf()
-    internal val presenters: MutableList<Presenter> = mutableListOf()
+    private val presenters: MutableList<Presenter> = mutableListOf()
+
+    @Synchronized
+    internal fun getPresenters(): List<Presenter> {
+        return presenters
+    }
 
     protected inline fun <reified P : Presenter> setPresenterProvider(presenterProvider: Provider<P>) {
         @Suppress("UNCHECKED_CAST")
         this.presenterProviders[P::class] = presenterProvider as Provider<Presenter>
     }
 
+    @Synchronized
     fun <P : Presenter> presenter(presenterClass: KClass<P>): P? {
         @Suppress("UNCHECKED_CAST")
         return presenters.firstOrNull {
@@ -203,6 +209,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         } as? P
     }
 
+    @Synchronized
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any>) {
         if (presenters.any { it::class.isSubclassOf(presenterClass) }) return
         val presenterProvider = presenterProviders.toList().firstOrNull { it.first == presenterClass }?.second
@@ -217,6 +224,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         }
     }
 
+    @Synchronized
     fun tearDownPresenter(presenterClass: KClass<*>) {
         val presenter = presenters.firstOrNull {
             it::class.isSubclassOf(presenterClass)

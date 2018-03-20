@@ -16,7 +16,7 @@ interface Presentable {
 
     fun attachToPresenter(presenterClass: KClass<*>) {
         @Suppress("UNCHECKED_CAST")
-        val presenter: Presenter = application.presenters.firstOrNull {
+        val presenter: Presenter = application.getPresenters().firstOrNull {
             it::class.isSubclassOf(presenterClass)
         } ?: return
         presenter.attachPresentable(this)
@@ -24,7 +24,7 @@ interface Presentable {
 
     fun detachFromPresenter(presenterClass: KClass<*>) {
         @Suppress("UNCHECKED_CAST")
-        val presenter: Presenter = application.presenters.firstOrNull {
+        val presenter: Presenter = application.getPresenters().firstOrNull {
             it::class.isSubclassOf(presenterClass)
         } ?: return
         presenter.detachPresentable(this)
