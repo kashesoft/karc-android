@@ -57,7 +57,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
-    @CallSuper
+    @Synchronized
     protected fun onStart() {
         if (logging) log("onStart")
         inForeground = true
@@ -66,7 +66,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
-    @CallSuper
+    @Synchronized
     protected fun onResume() {
         if (logging) log("onResume")
         isActive = true
@@ -75,7 +75,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
-    @CallSuper
+    @Synchronized
     protected fun onPause() {
         if (logging) log("onPause")
         isActive = false
@@ -84,7 +84,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    @CallSuper
+    @Synchronized
     protected fun onStop() {
         if (logging) log("onStop")
         inForeground = false
