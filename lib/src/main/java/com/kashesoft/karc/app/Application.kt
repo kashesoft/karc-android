@@ -61,8 +61,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStart() {
         if (logging) log("onStart")
         inForeground = true
-        gateways.forEach { it.doEnterForeground() }
-        presenters.forEach { it.doEnterForeground() }
+        gateways.toList().forEach { it.doEnterForeground() }
+        presenters.toList().forEach { it.doEnterForeground() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
@@ -70,8 +70,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onResume() {
         if (logging) log("onResume")
         isActive = true
-        gateways.forEach { it.doBecomeActive() }
-        presenters.forEach { it.doBecomeActive() }
+        gateways.toList().forEach { it.doBecomeActive() }
+        presenters.toList().forEach { it.doBecomeActive() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -79,8 +79,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onPause() {
         if (logging) log("onPause")
         isActive = false
-        gateways.forEach { it.doBecomeInactive() }
-        presenters.forEach { it.doBecomeInactive() }
+        gateways.toList().forEach { it.doBecomeInactive() }
+        presenters.toList().forEach { it.doBecomeInactive() }
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -88,8 +88,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected fun onStop() {
         if (logging) log("onStop")
         inForeground = false
-        gateways.forEach { it.doEnterBackground() }
-        presenters.forEach { it.doEnterBackground() }
+        gateways.toList().forEach { it.doEnterBackground() }
+        presenters.toList().forEach { it.doEnterBackground() }
         val stoppedActivity = stoppedActivityRef?.get() ?: return
         stoppedActivityRef?.clear()
         stoppedActivityRef = null
