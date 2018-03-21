@@ -59,15 +59,25 @@ class Interaction<R> constructor(
     private fun onInteractionResult(interactionState: InteractionState<R>) {
         val interactor = this.interactor.get() ?: return
         if (interactionState.status == InteractionState.Status.STARTED) {
-            subscription = generateSubscription()
+            try {
+                subscription = generateSubscription()
+            } catch (error: Throwable) {
+                error.printStackTrace()
+                publishInteractionState(InteractionState.error(this, error))
+                return
+            }
             interactor.attachInteraction(this)
         }
-        for (listener in listeners) {
-            listener.onInteractionResult(interactionState)
-        }
+        publishInteractionState(interactionState)
         if (interactionState.status == InteractionState.Status.STOPPED) {
             interactor.detachInteraction(this)
             subscription = null
+        }
+    }
+
+    private fun publishInteractionState(interactionState: InteractionState<R>) {
+        for (listener in listeners) {
+            listener.onInteractionResult(interactionState)
         }
     }
 
