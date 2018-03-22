@@ -154,6 +154,10 @@ abstract class Presenter(
         interactors.forEach { it.dispose(*tags) }
     }
 
+    fun isLoading(vararg tags: String) {
+        interactors.forEach { it.isLoading(*tags) }
+    }
+
     override fun onInteractionResult(interactionState: InteractionState<Any?>) {
         when (interactionState.status) {
             InteractionState.Status.STARTED -> {
