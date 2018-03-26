@@ -237,7 +237,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         fragmentTransaction
                 .setCustomAnimations(enterAnimation, exitAnimation)
                 .replace(containerViewId, fragment, fragmentTag)
-                .commitAllowingStateLoss()
+                .commitNowAllowingStateLoss()
     }
 
     //endregion
