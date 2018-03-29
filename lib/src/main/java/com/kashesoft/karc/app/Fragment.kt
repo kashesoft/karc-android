@@ -157,15 +157,16 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     protected open val presenterProvider: Provider<P>? = null
 
     private fun attachCompanionPresenter() {
-        if (viewModel.getPresenter() == null) {
+        val presenter = viewModel.getPresenter()
+        if (presenter == null) {
             val presenter = presenterProvider?.get() ?: return
             val params = router.paramsForComponent(this::class)
             presenter.attachPresentable(this)
             viewModel.setPresenter(presenter, params)
             this.presenter = presenter
         } else {
-            this.presenter = viewModel.getPresenter()!!
-            this.presenter?.attachPresentable(this)
+            presenter.attachPresentable(this)
+            this.presenter = presenter
         }
     }
 
