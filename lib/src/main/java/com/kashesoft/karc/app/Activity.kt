@@ -166,15 +166,16 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     protected open val presenterProvider: Provider<P>? = null
 
     private fun attachCompanionPresenter() {
-        val presenter = presenterProvider?.get() ?: return
-
         if (viewModel.getPresenter() == null) {
+            val presenter = presenterProvider?.get() ?: return
             val params = router.paramsForComponent(this::class)
+            presenter.attachPresentable(this)
             viewModel.setPresenter(presenter, params)
+            this.presenter = presenter
+        } else {
+            this.presenter = viewModel.getPresenter()!!
+            this.presenter?.attachPresentable(this)
         }
-
-        this.presenter = viewModel.getPresenter()!!
-        this.presenter?.attachPresentable(this)
     }
 
     private fun detachCompanionPresenter() {

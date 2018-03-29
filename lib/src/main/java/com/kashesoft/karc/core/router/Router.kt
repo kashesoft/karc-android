@@ -65,12 +65,13 @@ open class Router : Logging {
 
     @Synchronized
     internal fun route(route: Route) {
-        var query = route.currentQuery() ?: return
-        while (routables.any { it.route(query) }) {
+        var query: Query
+        do {
+            query = route.currentQuery() ?: return
             routedQueries.add(query)
             dismissRoutedQueryIfNeededAfterDelay(query, DEFAULT_ROUTED_QUERY_DISMISS_DELAY)
-            query = route.nextQuery() ?: return
-        }
+            route.nextQuery()
+        } while (routables.any { it.route(query) })
         if (route.isNotFinished()) {
             remainingRoutes.offer(route)
             dismissRemainingRouteIfNeededAfterDelay(route, DEFAULT_REMAINING_ROUTE_DISMISS_DELAY)
