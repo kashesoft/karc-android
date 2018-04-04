@@ -62,16 +62,11 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (logging) log("onStart")
         inForeground = true
 
-        val gi = gateways.listIterator()
-        while (gi.hasNext()) {
-            val gateway = gi.next()
-            gateway.doEnterForeground()
+        gateways.toList().forEach {
+            it.doEnterForeground()
         }
-
-        val pi = presenters.listIterator()
-        while (pi.hasNext()) {
-            val presenter = pi.next()
-            presenter.doEnterForeground()
+        presenters.toList().forEach {
+            it.doEnterForeground()
         }
     }
 
@@ -81,16 +76,11 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (logging) log("onResume")
         isActive = true
 
-        val gi = gateways.listIterator()
-        while (gi.hasNext()) {
-            val gateway = gi.next()
-            gateway.doBecomeActive()
+        gateways.toList().forEach {
+            it.doBecomeActive()
         }
-
-        val pi = presenters.listIterator()
-        while (pi.hasNext()) {
-            val presenter = pi.next()
-            presenter.doBecomeActive()
+        presenters.toList().forEach {
+            it.doBecomeActive()
         }
     }
 
@@ -100,16 +90,11 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (logging) log("onPause")
         isActive = false
 
-        val gi = gateways.listIterator()
-        while (gi.hasNext()) {
-            val gateway = gi.next()
-            gateway.doBecomeInactive()
+        gateways.toList().forEach {
+            it.doBecomeInactive()
         }
-
-        val pi = presenters.listIterator()
-        while (pi.hasNext()) {
-            val presenter = pi.next()
-            presenter.doBecomeInactive()
+        presenters.toList().forEach {
+            it.doBecomeInactive()
         }
     }
 
@@ -119,16 +104,11 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (logging) log("onStop")
         inForeground = false
 
-        val gi = gateways.listIterator()
-        while (gi.hasNext()) {
-            val gateway = gi.next()
-            gateway.doEnterBackground()
+        gateways.toList().forEach {
+            it.doEnterBackground()
         }
-
-        val pi = presenters.listIterator()
-        while (pi.hasNext()) {
-            val presenter = pi.next()
-            presenter.doEnterBackground()
+        presenters.toList().forEach {
+            it.doEnterBackground()
         }
 
         val stoppedActivity = stoppedActivityRef?.get() ?: return

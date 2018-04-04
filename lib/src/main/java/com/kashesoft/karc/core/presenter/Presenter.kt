@@ -19,6 +19,8 @@ abstract class Presenter(
 
     protected open val logging = false
 
+    private var isDead = false
+
     private fun log(message: String) {
         Log.v(name, ":::::::::::::::$message:::::::::::::::")
     }
@@ -37,37 +39,50 @@ abstract class Presenter(
 
     open fun onTearDown() {}
 
+    @Synchronized
     internal fun doSetUp(params: Map<String, Any>) {
+        if (isDead) return
         if (logging) log("onSetUp: params = $params")
         addInteractionListener(this)
         onSetUp(params)
     }
 
+    @Synchronized
     internal fun doEnterForeground() {
+        if (isDead) return
         if (logging) log("onEnterForeground")
         onEnterForeground()
     }
 
+    @Synchronized
     internal fun doBecomeActive() {
+        if (isDead) return
         if (logging) log("onBecomeActive")
         onBecomeActive()
     }
 
+    @Synchronized
     internal fun doBecomeInactive() {
+        if (isDead) return
         if (logging) log("onBecomeInactive")
         onBecomeInactive()
     }
 
+    @Synchronized
     internal fun doEnterBackground() {
+        if (isDead) return
         if (logging) log("onEnterBackground")
         onEnterBackground()
     }
 
+    @Synchronized
     internal fun doTearDown() {
+        if (isDead) return
         if (logging) log("onTearDown")
         removeInteractionListener(this)
         onTearDown()
         detachAllPresentable()
+        isDead = true
     }
 
     //endregion
