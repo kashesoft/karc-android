@@ -15,6 +15,7 @@ class Route(private val router: Router) {
         const val GATEWAY_TEAR_DOWN = "/gateway?tear_down"
         const val ACTIVITY_SHOW = "/activity?show"
         const val FRAGMENT_SHOW_IN_CONTAINER = "/fragment?show_in_container"
+        const val FRAGMENT_SHOW_AS_DIALOG = "/fragment?show_as_dialog"
     }
 
     object Param {
@@ -85,6 +86,17 @@ class Route(private val router: Router) {
                 params + mutableMapOf(
                         Route.Param.COMPONENT_CLASS to fragmentClass,
                         Route.Param.FRAGMENT_CONTAINER to fragmentContainer
+                )
+        )
+        queries.add(query)
+        return this
+    }
+
+    fun showFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        val query = Query(
+                Route.Path.FRAGMENT_SHOW_AS_DIALOG,
+                params + mutableMapOf(
+                        Route.Param.COMPONENT_CLASS to fragmentClass
                 )
         )
         queries.add(query)
