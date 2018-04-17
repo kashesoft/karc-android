@@ -63,6 +63,10 @@ open class Router : Logging {
         return Route(this).showFragmentInContainer(fragmentClass, fragmentContainer, params)
     }
 
+    fun showFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).showFragmentAsDialog(fragmentClass, params)
+    }
+
     @Synchronized
     internal fun route(route: Route) {
         var query: Query
