@@ -219,6 +219,12 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
                 showFragmentAsDialog(fragmentClass)
                 true
             }
+            Route.Path.FRAGMENT_HIDE_AS_DIALOG -> {
+                @Suppress("UNCHECKED_CAST")
+                val fragmentClass: KClass<DialogFragment<*, *>> = query.params[Route.Param.COMPONENT_CLASS] as KClass<DialogFragment<*, *>>
+                hideFragmentAsDialog(fragmentClass)
+                true
+            }
             else -> false
         }
     }
@@ -256,6 +262,13 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         val fragment = fragmentClass.createInstance()
 
         fragment.show(supportFragmentManager, fragmentTag)
+    }
+
+    private fun <T : DialogFragment<*, *>> hideFragmentAsDialog(fragmentClass: KClass<T>) {
+        val fragmentTag = fragmentClass.simpleName!!
+        val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag) as? DialogFragment<*, *> ?: return
+
+        currentFragmentWithTag.dismissAllowingStateLoss()
     }
 
     //endregion
