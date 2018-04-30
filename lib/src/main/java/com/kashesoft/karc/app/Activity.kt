@@ -194,7 +194,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         router.attachRoutable(this)
     }
 
-    private fun detachCompanionRouter() {
+    internal fun detachCompanionRouter() {
         router.detachRoutable(this)
     }
 

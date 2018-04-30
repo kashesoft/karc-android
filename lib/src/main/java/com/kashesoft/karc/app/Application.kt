@@ -295,6 +295,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
                 val intent = Intent(currentActivity, activityClass)
                 currentActivity.startActivity(intent)
+                currentActivity.detachCompanionRouter()
                 true
             }
             else -> false

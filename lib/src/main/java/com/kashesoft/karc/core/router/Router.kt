@@ -78,8 +78,14 @@ open class Router : Logging {
             query = route.currentQuery() ?: return
             routedQueries.add(query)
             dismissRoutedQueryIfNeededAfterDelay(query, DEFAULT_ROUTED_QUERY_DISMISS_DELAY)
-            route.nextQuery()
-        } while (routables.any { it.route(query) })
+        } while (
+                if (routables.any { it.route(query) }) {
+                    route.nextQuery()
+                    true
+                } else {
+                    false
+                }
+        )
         if (route.isNotFinished()) {
             remainingRoutes.offer(route)
             dismissRemainingRouteIfNeededAfterDelay(route, DEFAULT_REMAINING_ROUTE_DISMISS_DELAY)
