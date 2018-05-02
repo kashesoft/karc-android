@@ -71,8 +71,8 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     @CallSuper
     override fun onResume() {
         if (logging) log("onResume")
-        super.onResume()
         attachCompanionRouter()
+        super.onResume()
         if (layoutIsCompleted) {
             becomeActive()
         }
@@ -82,8 +82,8 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     override fun onPause() {
         if (logging) log("onPause")
         becomeInactive()
-        detachCompanionRouter()
         super.onPause()
+        detachCompanionRouter()
     }
 
     @CallSuper

@@ -70,9 +70,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     @Synchronized
-    protected fun onResume() {
+    private fun onResume() {
         if (logging) log("onResume")
         isActive = true
 
@@ -84,9 +83,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         }
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     @Synchronized
-    protected fun onPause() {
+    private fun onPause() {
         if (logging) log("onPause")
         isActive = false
 
@@ -132,10 +130,14 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         val resumedActivity = activity as Activity<*, *>
         startedActivities.remove(resumedActivity)
         resumedActivityRef = WeakReference(resumedActivity)
+
+        onResume()
     }
 
     @CallSuper
     override fun onActivityPaused(activity: android.app.Activity) {
+        onPause()
+
         val pausedActivity = activity as Activity<*, *>
         resumedActivityRef?.clear()
         resumedActivityRef = null

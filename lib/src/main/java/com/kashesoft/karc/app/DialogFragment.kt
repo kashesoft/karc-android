@@ -71,8 +71,8 @@ abstract class DialogFragment<P : Presenter, out R : Router> : DaggerAppCompatDi
     @CallSuper
     override fun onResume() {
         if (logging) log("onResume")
-        super.onResume()
         attachCompanionRouter()
+        super.onResume()
         if (layoutIsCompleted) {
             becomeActive()
         }
@@ -82,8 +82,8 @@ abstract class DialogFragment<P : Presenter, out R : Router> : DaggerAppCompatDi
     override fun onPause() {
         if (logging) log("onPause")
         becomeInactive()
-        detachCompanionRouter()
         super.onPause()
+        detachCompanionRouter()
     }
 
     @CallSuper

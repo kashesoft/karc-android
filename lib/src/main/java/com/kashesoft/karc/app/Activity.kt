@@ -75,8 +75,8 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     override fun onResume() {
         if (logging) log("onResume")
         isResumed = true
-        super.onResume()
         attachCompanionRouter()
+        super.onResume()
         if (layoutIsCompleted) {
             becomeActive()
         }
@@ -86,8 +86,8 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     override fun onPause() {
         if (logging) log("onPause")
         becomeInactive()
-        detachCompanionRouter()
         super.onPause()
+        detachCompanionRouter()
         isResumed = false
     }
 
