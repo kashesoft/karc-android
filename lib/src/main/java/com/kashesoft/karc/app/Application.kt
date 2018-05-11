@@ -68,6 +68,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         presenters.toList().forEach {
             it.doEnterForeground()
         }
+        onEnterForeground()
     }
 
     @Synchronized
@@ -81,6 +82,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         presenters.toList().forEach {
             it.doBecomeActive()
         }
+        onBecomeActive()
     }
 
     @Synchronized
@@ -88,10 +90,11 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (logging) log("onPause")
         isActive = false
 
-        gateways.toList().forEach {
+        onBecomeInactive()
+        presenters.toList().forEach {
             it.doBecomeInactive()
         }
-        presenters.toList().forEach {
+        gateways.toList().forEach {
             it.doBecomeInactive()
         }
     }
@@ -102,10 +105,11 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         if (logging) log("onStop")
         inForeground = false
 
-        gateways.toList().forEach {
+        onEnterBackground()
+        presenters.toList().forEach {
             it.doEnterBackground()
         }
-        presenters.toList().forEach {
+        gateways.toList().forEach {
             it.doEnterBackground()
         }
 
@@ -156,6 +160,14 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     override fun onActivityDestroyed(activity: android.app.Activity) {}
 
     override fun onActivitySaveInstanceState(activity: android.app.Activity, bundle: Bundle?) {}
+
+    open fun onEnterForeground() {}
+
+    open fun onBecomeActive() {}
+
+    open fun onBecomeInactive() {}
+
+    open fun onEnterBackground() {}
 
     //endregion
 
