@@ -4,6 +4,7 @@
 
 package com.kashesoft.karc.app
 
+import android.app.Activity
 import android.app.Application
 import android.arch.lifecycle.Lifecycle
 import android.arch.lifecycle.LifecycleObserver
@@ -27,6 +28,8 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.isSubclassOf
 
+private typealias KarcActivity = com.kashesoft.karc.app.Activity<*, *>
+
 abstract class Application<out R : Router> : DaggerApplication(), Logging,
         LifecycleObserver, Application.ActivityLifecycleCallbacks, Routable {
 
@@ -38,13 +41,13 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     //region <==========|Lifecycle|==========>
 
-    private var resumedActivityRef: WeakReference<Activity<*, *>>? = null
-    private var startedActivities: MutableSet<Activity<*, *>> = mutableSetOf()
-    private var stoppedActivityRef: WeakReference<Activity<*, *>>? = null
+    private var resumedActivityRef: WeakReference<Activity>? = null
+    private var startedActivities: MutableSet<Activity> = mutableSetOf()
+    private var stoppedActivityRef: WeakReference<Activity>? = null
     private var inForeground = false
     private var isActive = false
 
-    val resumedActivity: Activity<*, *>?
+    val resumedActivity: Activity?
         get() = resumedActivityRef?.get()
 
     @CallSuper
@@ -116,50 +119,46 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         val stoppedActivity = stoppedActivityRef?.get() ?: return
         stoppedActivityRef?.clear()
         stoppedActivityRef = null
-        stoppedActivity.enterBackground()
+        (stoppedActivity as? KarcActivity)?.enterBackground()
     }
 
-    override fun onActivityCreated(activity: android.app.Activity, bundle: Bundle?) {}
+    override fun onActivityCreated(activity: Activity, bundle: Bundle?) {}
 
-    override fun onActivityStarted(activity: android.app.Activity) {
-        val startedActivity = activity as Activity<*, *>
+    override fun onActivityStarted(activity: Activity) {
         if (startedActivities.isNotEmpty() || !inForeground) {
-            startedActivity.enterForeground()
+            (activity as? KarcActivity)?.enterForeground()
         }
-        startedActivities.add(startedActivity)
+        startedActivities.add(activity)
     }
 
     @CallSuper
-    override fun onActivityResumed(activity: android.app.Activity) {
-        val resumedActivity = activity as Activity<*, *>
-        startedActivities.remove(resumedActivity)
-        resumedActivityRef = WeakReference(resumedActivity)
+    override fun onActivityResumed(activity: Activity) {
+        startedActivities.remove(activity)
+        resumedActivityRef = WeakReference(activity)
 
         onResume()
     }
 
     @CallSuper
-    override fun onActivityPaused(activity: android.app.Activity) {
+    override fun onActivityPaused(activity: Activity) {
         onPause()
 
-        val pausedActivity = activity as Activity<*, *>
         resumedActivityRef?.clear()
         resumedActivityRef = null
-        startedActivities.add(pausedActivity)
+        startedActivities.add(activity)
     }
 
-    override fun onActivityStopped(activity: android.app.Activity) {
-        val stoppedActivity = activity as Activity<*, *>
-        startedActivities.remove(stoppedActivity)
-        stoppedActivityRef = WeakReference(stoppedActivity)
+    override fun onActivityStopped(activity: Activity) {
+        startedActivities.remove(activity)
+        stoppedActivityRef = WeakReference(activity)
         if (resumedActivityRef?.get() != null) {
-            stoppedActivity.enterBackground()
+            (activity as? KarcActivity)?.enterBackground()
         }
     }
 
-    override fun onActivityDestroyed(activity: android.app.Activity) {}
+    override fun onActivityDestroyed(activity: Activity) {}
 
-    override fun onActivitySaveInstanceState(activity: android.app.Activity, bundle: Bundle?) {}
+    override fun onActivitySaveInstanceState(activity: Activity, bundle: Bundle?) {}
 
     open fun onEnterForeground() {}
 
@@ -309,7 +308,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
                 val intent = Intent(currentActivity, activityClass)
                 currentActivity.startActivity(intent)
-                currentActivity.detachCompanionRouter()
+                (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
             }
             else -> false
