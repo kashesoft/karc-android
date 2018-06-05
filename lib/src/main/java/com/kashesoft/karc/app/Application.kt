@@ -302,12 +302,20 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 tearDownGateway(gatewayClass)
                 true
             }
-            Route.Path.ACTIVITY_SHOW -> {
+            Route.Path.ACTIVITY_START -> {
                 val currentActivity = resumedActivityRef?.get() ?: return false
                 val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
                 if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
                 val intent = Intent(currentActivity, activityClass)
                 currentActivity.startActivity(intent)
+                (currentActivity as? KarcActivity)?.detachCompanionRouter()
+                true
+            }
+            Route.Path.ACTIVITY_FINISH -> {
+                val currentActivity = resumedActivityRef?.get() ?: return false
+                val activityClass: Class<*>? = (query.params[Route.Param.COMPONENT_CLASS] as? KClass<*>)?.java
+                if (activityClass != null && !currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
+                currentActivity.finish()
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
             }

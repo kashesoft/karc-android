@@ -13,7 +13,8 @@ class Route(private val router: Router) {
         const val PRESENTER_TEAR_DOWN = "/presenter?tear_down"
         const val GATEWAY_SET_UP = "/gateway?set_up"
         const val GATEWAY_TEAR_DOWN = "/gateway?tear_down"
-        const val ACTIVITY_SHOW = "/activity?show"
+        const val ACTIVITY_START = "/activity?start"
+        const val ACTIVITY_FINISH = "/activity?finish"
         const val FRAGMENT_SHOW_IN_CONTAINER = "/fragment?show_in_container"
         const val FRAGMENT_SHOW_AS_DIALOG = "/fragment?show_as_dialog"
         const val FRAGMENT_HIDE_AS_DIALOG = "/fragment?hide_as_dialog"
@@ -39,7 +40,7 @@ class Route(private val router: Router) {
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.PRESENTER_SET_UP,
-                params + mutableMapOf(Route.Param.COMPONENT_CLASS to presenterClass)
+                params + mapOf(Route.Param.COMPONENT_CLASS to presenterClass)
         )
         queries.add(query)
         return this
@@ -48,7 +49,7 @@ class Route(private val router: Router) {
     fun tearDownPresenter(presenterClass: KClass<*>): Route {
         val query = Query(
                 Route.Path.PRESENTER_TEAR_DOWN,
-                mutableMapOf(Route.Param.COMPONENT_CLASS to presenterClass)
+                mapOf(Route.Param.COMPONENT_CLASS to presenterClass)
         )
         queries.add(query)
         return this
@@ -57,7 +58,7 @@ class Route(private val router: Router) {
     fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.GATEWAY_SET_UP,
-                params + mutableMapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
+                params + mapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
         )
         queries.add(query)
         return this
@@ -66,16 +67,25 @@ class Route(private val router: Router) {
     fun tearDownGateway(gatewayClass: KClass<*>): Route {
         val query = Query(
                 Route.Path.GATEWAY_TEAR_DOWN,
-                mutableMapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
+                mapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
         )
         queries.add(query)
         return this
     }
 
-    fun showActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun startActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.ACTIVITY_SHOW,
-                params + mutableMapOf(Route.Param.COMPONENT_CLASS to activityClass)
+                Route.Path.ACTIVITY_START,
+                params + mapOf(Route.Param.COMPONENT_CLASS to activityClass)
+        )
+        queries.add(query)
+        return this
+    }
+
+    fun finishActivity(activityClass: KClass<*>? = null): Route {
+        val query = Query(
+                Route.Path.ACTIVITY_FINISH,
+                if (activityClass != null) mapOf(Route.Param.COMPONENT_CLASS to activityClass) else mapOf()
         )
         queries.add(query)
         return this
@@ -84,7 +94,7 @@ class Route(private val router: Router) {
     fun showFragmentInContainer(fragmentClass: KClass<*>, fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.FRAGMENT_SHOW_IN_CONTAINER,
-                params + mutableMapOf(
+                params + mapOf(
                         Route.Param.COMPONENT_CLASS to fragmentClass,
                         Route.Param.FRAGMENT_CONTAINER to fragmentContainer
                 )
@@ -96,7 +106,7 @@ class Route(private val router: Router) {
     fun showFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.FRAGMENT_SHOW_AS_DIALOG,
-                params + mutableMapOf(
+                params + mapOf(
                         Route.Param.COMPONENT_CLASS to fragmentClass
                 )
         )
@@ -107,7 +117,7 @@ class Route(private val router: Router) {
     fun hideFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.FRAGMENT_HIDE_AS_DIALOG,
-                params + mutableMapOf(
+                params + mapOf(
                         Route.Param.COMPONENT_CLASS to fragmentClass
                 )
         )

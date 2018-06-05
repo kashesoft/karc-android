@@ -63,7 +63,7 @@ class MainActivity : Activity<MainPresenter, MainRouter>(), UserPresenter.View {
         }
         //
         nextButton.setOnClickListener {
-            router.showActivity(
+            router.startActivity(
                     DetailsActivity::class,
                     mapOf("string" to "test string", "number" to 123)
             ).route()

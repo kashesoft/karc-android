@@ -55,8 +55,12 @@ open class Router : Logging {
         return Route(this).tearDownGateway(gatewayClass)
     }
 
-    fun showActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).showActivity(activityClass, params)
+    fun startActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).startActivity(activityClass, params)
+    }
+
+    fun finishActivity(activityClass: KClass<*>? = null): Route {
+        return Route(this).finishActivity(activityClass)
     }
 
     fun showFragmentInContainer(fragmentClass: KClass<*>, fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
