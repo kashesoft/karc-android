@@ -125,7 +125,8 @@ abstract class Presenter(
     }
 
     fun <V : Presentable> detachPresentable(presentable: V) {
-        presentables.remove(presentable)
+        val detached = presentables.remove(presentable)
+        if (!detached) return
         if (logging) log("onPresentableDetached: $presentable")
         onPresentableDetached(presentable)
     }
