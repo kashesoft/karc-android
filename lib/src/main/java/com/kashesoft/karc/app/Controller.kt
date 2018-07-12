@@ -4,13 +4,19 @@
 
 package com.kashesoft.karc.app
 
-import android.os.Handler
 import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Logging
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.Future
 
 abstract class Controller : Logging, Gateway, Routable {
+
+    companion object {
+        const val DEFAULT_TIMEOUT_MILLIS = 60000L
+    }
 
     protected open val logging = false
 
@@ -91,7 +97,7 @@ abstract class Controller : Logging, Gateway, Routable {
     var state: State = State.DEINITIALIZED
         private set
 
-    private var handler: Handler? = null
+    private var executorService: ExecutorService = Executors.newFixedThreadPool(1)
     private val lock = Any()
 
     open fun onInitialize() {}
@@ -115,7 +121,7 @@ abstract class Controller : Logging, Gateway, Routable {
     @Synchronized
     protected fun initialize() {
         state = State.INITIALIZING
-        handler = asyncSafely(
+        val futureTask = asyncSafely(
                 onTry = {
                     synchronized(lock) {
                         onInitialize()
@@ -125,6 +131,7 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.INITIALIZED
+                        if (logging) log("onInitializationSuccess")
                         onInitializationSuccess()
                     }
                 },
@@ -134,19 +141,18 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.DEINITIALIZED
+                        if (logging) log("onInitializationFailure: error = $error")
                         onInitializationFailure(error)
                     }
-                },
-                onFinally = {
-                    disposeHandler()
                 }
         )
+        cancelFutureTaskAfterDelayIfNeeded(futureTask, DEFAULT_TIMEOUT_MILLIS)
     }
 
     @Synchronized
     protected fun deinitialize() {
         state = State.DEINITIALIZING
-        handler = asyncSafely(
+        val futureTask = asyncSafely(
                 onTry = {
                     synchronized(lock) {
                         onDeinitialize()
@@ -156,6 +162,7 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.DEINITIALIZED
+                        if (logging) log("onDeinitializationSuccess")
                         onDeinitializationSuccess()
                     }
                 },
@@ -165,37 +172,46 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.INITIALIZED
+                        if (logging) log("onDeinitializationFailure: error = $error")
                         onDeinitializationFailure(error)
                     }
                 },
                 onFinally = {
-                    disposeHandler()
+                    shutdownExecutorServiceIfDead()
                 }
         )
+        cancelFutureTaskAfterDelayIfNeeded(futureTask, DEFAULT_TIMEOUT_MILLIS)
     }
 
     @Synchronized
-    private fun disposeHandler() {
-        handler?.removeCallbacksAndMessages(null)
-        handler = null
+    private fun shutdownExecutorServiceIfDead() {
+        if (isDead) {
+            executorService.shutdown()
+        }
     }
 
     private fun asyncSafely(
             onTry: () -> Unit,
             onCatch: (Throwable) -> Unit,
-            onFinally: () -> Unit
-    ): Handler {
-        val handler = Handler()
-        handler.post {
+            onFinally: (() -> Unit)? = null
+    ): Future<*> {
+        return executorService.submit {
             try {
                 onTry()
             } catch (e: Throwable) {
                 onCatch(e)
             } finally {
-                onFinally()
+                onFinally?.invoke()
             }
         }
-        return handler
+    }
+
+    private fun cancelFutureTaskAfterDelayIfNeeded(futureTask: Future<*>, delayMillis: Long) {
+        android.os.Handler().postDelayed({
+            if (!futureTask.isDone) {
+                futureTask.cancel(true)
+            }
+        }, delayMillis)
     }
 
     //endregion
