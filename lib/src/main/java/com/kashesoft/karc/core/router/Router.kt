@@ -31,8 +31,9 @@ open class Router : Logging {
     }
 
     @Synchronized
-    fun clear() {
+    fun clear(): Router {
         remainingRoutes.clear()
+        return this
     }
 
     fun path(path: String, params: Map<String, Any> = mapOf()): Route {
@@ -61,6 +62,10 @@ open class Router : Logging {
 
     fun finishActivity(activityClass: KClass<*>? = null): Route {
         return Route(this).finishActivity(activityClass)
+    }
+
+    fun finishActivityExcept(activityClass: KClass<*>): Route {
+        return Route(this).finishActivityExcept(activityClass)
     }
 
     fun showFragmentInContainer(fragmentClass: KClass<*>, fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {

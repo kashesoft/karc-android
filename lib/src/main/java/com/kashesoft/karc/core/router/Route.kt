@@ -15,6 +15,7 @@ class Route(private val router: Router) {
         const val GATEWAY_TEAR_DOWN = "/gateway?tear_down"
         const val ACTIVITY_START = "/activity?start"
         const val ACTIVITY_FINISH = "/activity?finish"
+        const val ACTIVITY_FINISH_EXCEPT = "/activity?finish_except"
         const val FRAGMENT_SHOW_IN_CONTAINER = "/fragment?show_in_container"
         const val FRAGMENT_SHOW_AS_DIALOG = "/fragment?show_as_dialog"
         const val FRAGMENT_HIDE_AS_DIALOG = "/fragment?hide_as_dialog"
@@ -86,6 +87,15 @@ class Route(private val router: Router) {
         val query = Query(
                 Route.Path.ACTIVITY_FINISH,
                 if (activityClass != null) mapOf(Route.Param.COMPONENT_CLASS to activityClass) else mapOf()
+        )
+        queries.add(query)
+        return this
+    }
+
+    fun finishActivityExcept(activityClass: KClass<*>): Route {
+        val query = Query(
+                Route.Path.ACTIVITY_FINISH_EXCEPT,
+                mapOf(Route.Param.COMPONENT_CLASS to activityClass)
         )
         queries.add(query)
         return this

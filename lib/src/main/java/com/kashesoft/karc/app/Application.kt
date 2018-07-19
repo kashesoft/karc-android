@@ -319,6 +319,14 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
             }
+            Route.Path.ACTIVITY_FINISH_EXCEPT -> {
+                val currentActivity = resumedActivityRef?.get() ?: return false
+                val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
+                if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
+                currentActivity.finish()
+                (currentActivity as? KarcActivity)?.detachCompanionRouter()
+                true
+            }
             else -> false
         }
     }
