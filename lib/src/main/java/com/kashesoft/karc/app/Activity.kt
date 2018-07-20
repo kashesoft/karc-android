@@ -205,13 +205,17 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
                 @Suppress("UNCHECKED_CAST")
                 val fragmentClass: KClass<Fragment<*, *>> = query.params[Route.Param.COMPONENT_CLASS] as KClass<Fragment<*, *>>
                 val fragmentContainer: Int = query.params[Route.Param.FRAGMENT_CONTAINER] as Int
-                showFragmentInContainer(
-                        fragmentClass,
-                        fragmentContainer,
-                        android.R.animator.fade_in,
-                        android.R.animator.fade_out
-                )
-                true
+                if (hasViewWithId(fragmentContainer)) {
+                    showFragmentInContainer(
+                            fragmentClass,
+                            fragmentContainer,
+                            android.R.animator.fade_in,
+                            android.R.animator.fade_out
+                    )
+                    true
+                } else {
+                    false
+                }
             }
             Route.Path.FRAGMENT_SHOW_AS_DIALOG -> {
                 @Suppress("UNCHECKED_CAST")
@@ -269,6 +273,10 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag) as? DialogFragment<*, *> ?: return
 
         currentFragmentWithTag.dismissAllowingStateLoss()
+    }
+
+    private fun hasViewWithId(viewId: Int): Boolean {
+        return findViewById<View>(viewId) != null
     }
 
     //endregion

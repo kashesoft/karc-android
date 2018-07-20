@@ -60,6 +60,10 @@ open class Router : Logging {
         return Route(this).startActivity(activityClass, params)
     }
 
+    fun startActivityNewClear(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).startActivityNewClear(activityClass, params)
+    }
+
     fun finishActivity(activityClass: KClass<*>? = null): Route {
         return Route(this).finishActivity(activityClass)
     }

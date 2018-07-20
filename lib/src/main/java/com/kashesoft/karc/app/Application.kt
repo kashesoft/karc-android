@@ -316,6 +316,17 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
             }
+            Route.Path.ACTIVITY_START_NEW_CLEAR -> {
+                val currentActivity = resumedActivityRef?.get() ?: return false
+                val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
+                if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
+                val intent = Intent(currentActivity, activityClass)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                if (logging) log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
+                currentActivity.startActivity(intent)
+                (currentActivity as? KarcActivity)?.detachCompanionRouter()
+                true
+            }
             Route.Path.ACTIVITY_FINISH -> {
                 val currentActivity = resumedActivityRef?.get() ?: return false
                 val activityClass: Class<*>? = (query.params[Route.Param.COMPONENT_CLASS] as? KClass<*>)?.java

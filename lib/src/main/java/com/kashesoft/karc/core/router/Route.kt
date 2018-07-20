@@ -14,6 +14,7 @@ class Route(private val router: Router) {
         const val GATEWAY_SET_UP = "/gateway?set_up"
         const val GATEWAY_TEAR_DOWN = "/gateway?tear_down"
         const val ACTIVITY_START = "/activity?start"
+        const val ACTIVITY_START_NEW_CLEAR = "/activity?start_new_clear"
         const val ACTIVITY_FINISH = "/activity?finish"
         const val ACTIVITY_FINISH_EXCEPT = "/activity?finish_except"
         const val FRAGMENT_SHOW_IN_CONTAINER = "/fragment?show_in_container"
@@ -77,6 +78,15 @@ class Route(private val router: Router) {
     fun startActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Route.Path.ACTIVITY_START,
+                params + mapOf(Route.Param.COMPONENT_CLASS to activityClass)
+        )
+        queries.add(query)
+        return this
+    }
+
+    fun startActivityNewClear(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        val query = Query(
+                Route.Path.ACTIVITY_START_NEW_CLEAR,
                 params + mapOf(Route.Param.COMPONENT_CLASS to activityClass)
         )
         queries.add(query)
