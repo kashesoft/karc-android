@@ -6,7 +6,6 @@ package com.kashesoft.karc.core.presenter
 
 import com.kashesoft.karc.app.Application
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 interface Presentable {
 
@@ -15,20 +14,11 @@ interface Presentable {
     fun onError(error: Throwable) {}
 
     fun attachToPresenter(presenterClass: KClass<*>) {
-        @Suppress("UNCHECKED_CAST")
-        val presenter: Presenter = application.getPresenters().firstOrNull {
-            it::class.isSubclassOf(presenterClass)
-        } ?: return
-        presenter.attachPresentable(this)
+        application.attachPresentableToPresenterWithClass(this, presenterClass)
     }
 
     fun detachFromPresenter(presenterClass: KClass<*>) {
-        @Suppress("UNCHECKED_CAST")
-        val presenter: Presenter = application.getPresenters().firstOrNull {
-            it::class.isSubclassOf(presenterClass)
-        } ?: return
-        presenter.detachPresentable(this)
+        application.detachPresentableFromPresenterWithClass(this, presenterClass)
     }
 
 }
-

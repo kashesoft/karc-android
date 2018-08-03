@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.support.annotation.CallSuper
 import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
+import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
@@ -175,15 +176,16 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     protected val gatewayProviders: MutableMap<KClass<*>, Provider<Gateway>> = mutableMapOf()
     private val gateways: MutableList<Gateway> = mutableListOf()
 
+    fun getGateways(): List<Gateway> = gateways.toList()
+
     protected inline fun <reified G : Gateway> setGatewayProvider(gatewayProvider: Provider<G>) {
         @Suppress("UNCHECKED_CAST")
         this.gatewayProviders[G::class] = gatewayProvider as Provider<Gateway>
     }
 
     @Synchronized
-    fun <G : Gateway> gateway(gatewayClass: KClass<G>): G? {
-        @Suppress("UNCHECKED_CAST")
-        return gateways.firstOrNull {
+    inline fun <reified G : Gateway> gateway(gatewayClass: KClass<G>): G? {
+        return getGateways().firstOrNull {
             it::class.isSubclassOf(gatewayClass)
         } as? G
     }
@@ -224,10 +226,34 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     protected val presenterProviders: MutableMap<KClass<*>, Provider<Presenter>> = mutableMapOf()
     private val presenters: MutableList<Presenter> = mutableListOf()
+    private val presentableForPresenterClassesMap: MutableMap<Presentable, MutableSet<KClass<*>>> = mutableMapOf()
+
+    fun getPresenters(): List<Presenter> = presenters.toList()
 
     @Synchronized
-    internal fun getPresenters(): List<Presenter> {
-        return presenters
+    internal fun attachPresentableToPresenterWithClass(presentable: Presentable, presenterClass: KClass<*>) {
+        if (presentableForPresenterClassesMap[presentable] == null) {
+            presentableForPresenterClassesMap[presentable] = mutableSetOf()
+        }
+        presentableForPresenterClassesMap[presentable]?.add(presenterClass)
+
+        val presenter: Presenter = presenters.firstOrNull {
+            it::class.isSubclassOf(presenterClass)
+        } ?: return
+        presenter.attachPresentable(presentable)
+    }
+
+    @Synchronized
+    internal fun detachPresentableFromPresenterWithClass(presentable: Presentable, presenterClass: KClass<*>) {
+        presentableForPresenterClassesMap[presentable]?.remove(presenterClass)
+        if (presentableForPresenterClassesMap[presentable]?.isEmpty() == true) {
+            presentableForPresenterClassesMap.remove(presentable)
+        }
+
+        val presenter: Presenter = presenters.firstOrNull {
+            it::class.isSubclassOf(presenterClass)
+        } ?: return
+        presenter.detachPresentable(presentable)
     }
 
     protected inline fun <reified P : Presenter> setPresenterProvider(presenterProvider: Provider<P>) {
@@ -236,9 +262,8 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     }
 
     @Synchronized
-    fun <P : Presenter> presenter(presenterClass: KClass<P>): P? {
-        @Suppress("UNCHECKED_CAST")
-        return presenters.firstOrNull {
+    inline fun <reified P : Presenter> presenter(presenterClass: KClass<P>): P? {
+        return getPresenters().firstOrNull {
             it::class.isSubclassOf(presenterClass)
         } as? P
     }
@@ -249,6 +274,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         val presenterProvider = presenterProviders.toList().firstOrNull { it.first == presenterClass }?.second
         val presenter = if (presenterProvider != null) presenterProvider.get() else presenterClass.createInstance() as Presenter
         presenters.add(presenter)
+        attachPresentablesForPresenter(presenter)
         presenter.doSetUp(params)
         if (inForeground) {
             presenter.doEnterForeground()
@@ -271,6 +297,13 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         }
         presenter.doTearDown()
         presenters.remove(presenter)
+    }
+
+    private fun attachPresentablesForPresenter(presenter: Presenter) {
+        presentableForPresenterClassesMap
+                .filter { (_, presenterClasses) -> presenterClasses.any { it == presenter::class } }
+                .map { it.key }
+                .forEach { presenter.attachPresentable(it) }
     }
 
     //endregion

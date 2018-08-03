@@ -91,17 +91,17 @@ abstract class Presenter(
 
     private val presentables: MutableList<Presentable> = mutableListOf()
 
-    fun <V : Presentable> presentable(presentableClass: KClass<V>): V? {
-        @Suppress("UNCHECKED_CAST")
-        return presentables.firstOrNull {
+    fun getPresentables(): List<Presentable> = presentables.toList()
+
+    inline fun <reified V : Presentable> presentable(presentableClass: KClass<V>): V? {
+        return getPresentables().firstOrNull {
             it::class.isSubclassOf(presentableClass)
         } as? V
     }
 
-    fun <V : Presentable> present(onPresentable: (V) -> Unit) {
-        presentables.forEach {
-            @Suppress("UNCHECKED_CAST")
-            val presentable = (it as? V) ?: return@forEach
+    inline fun <reified V : Presentable> present(onPresentable: (V) -> Unit) {
+        getPresentables().forEach {
+            val presentable: V = (it as? V) ?: return@forEach
             onPresentable(presentable)
         }
     }
