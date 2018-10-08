@@ -10,7 +10,6 @@ import android.support.annotation.AnimRes
 import android.support.annotation.AnimatorRes
 import android.support.annotation.CallSuper
 import android.support.annotation.IdRes
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -30,6 +29,13 @@ import kotlin.reflect.full.createInstance
 abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity(),
         Logging, Presentable, Routable {
 
+    override val logging = true
+    open val loggingLifecycle = false
+
+    private fun log(message: String) {
+        if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
+    }
+
     override val application: Application<*>
         get() = applicationContext as Application<*>
 
@@ -39,12 +45,6 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
     protected val view: View
         get() = window.decorView.rootView
-
-    protected open val logging = false
-
-    private fun log(message: String) {
-        Log.v(name, ":::::::::::::::$message:::::::::::::::")
-    }
 
     //region <==========|Lifecycle|==========>
 
@@ -57,7 +57,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
-        if (logging) log("onCreate")
+        log("onCreate")
         super.onCreate(savedInstanceState)
         prepareView()
         onLoad()
@@ -67,13 +67,13 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
     @CallSuper
     override fun onStart() {
-        if (logging) log("onStart")
+        log("onStart")
         super.onStart()
     }
 
     @CallSuper
     override fun onResume() {
-        if (logging) log("onResume")
+        log("onResume")
         isResumed = true
         attachCompanionRouter()
         super.onResume()
@@ -84,7 +84,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
     @CallSuper
     override fun onPause() {
-        if (logging) log("onPause")
+        log("onPause")
         becomeInactive()
         super.onPause()
         detachCompanionRouter()
@@ -93,13 +93,13 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
     @CallSuper
     override fun onStop() {
-        if (logging) log("onStop")
+        log("onStop")
         super.onStop()
     }
 
     @CallSuper
     override fun onDestroy() {
-        if (logging) log("onDestroy")
+        log("onDestroy")
         super.onDestroy()
         detachCompanionPresenter()
     }
@@ -120,13 +120,13 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     }
 
     private fun onLoad() {
-        if (logging) log("viewDidLoad")
+        log("viewDidLoad")
         viewDidLoad()
     }
 
     private fun onLayout() {
         layoutIsCompleted = true
-        if (logging) log("viewDidLayout: (view.width = ${view.width}, view.height = ${view.height})")
+        log("viewDidLayout: (view.width = ${view.width}, view.height = ${view.height})")
         viewDidLayout()
         if (isResumed) {
             becomeActive()

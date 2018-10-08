@@ -8,6 +8,8 @@ import com.kashesoft.karc.utils.Logging
 
 abstract class Interactor : Logging {
 
+    override val logging = true
+
     private val interactions: MutableList<Interaction<Any>> = mutableListOf()
     private val listeners: MutableList<InteractionListener<Any>> = mutableListOf()
 

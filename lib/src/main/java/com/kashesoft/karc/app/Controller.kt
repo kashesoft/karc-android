@@ -4,7 +4,6 @@
 
 package com.kashesoft.karc.app
 
-import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Logging
@@ -14,17 +13,18 @@ import java.util.concurrent.Future
 
 abstract class Controller : Logging, Gateway, Routable {
 
+    override val logging = true
+    open val loggingLifecycle = false
+
+    private fun log(message: String) {
+        if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
+    }
+
     companion object {
         const val DEFAULT_TIMEOUT_MILLIS = 60000L
     }
 
-    protected open val logging = false
-
     private var isDead = false
-
-    private fun log(message: String) {
-        Log.v(name, ":::::::::::::::$message:::::::::::::::")
-    }
 
     //region <==========|Lifecycle|==========>
 
@@ -43,7 +43,7 @@ abstract class Controller : Logging, Gateway, Routable {
     @Synchronized
     override fun doSetUp(params: Map<String, Any>) {
         if (isDead) return
-        if (logging) log("onSetUp: params = $params")
+        log("onSetUp: params = $params")
         onSetUp(params)
         initialize()
     }
@@ -51,35 +51,35 @@ abstract class Controller : Logging, Gateway, Routable {
     @Synchronized
     override fun doEnterForeground() {
         if (isDead) return
-        if (logging) log("onEnterForeground")
+        log("onEnterForeground")
         onEnterForeground()
     }
 
     @Synchronized
     override fun doBecomeActive() {
         if (isDead) return
-        if (logging) log("onBecomeActive")
+        log("onBecomeActive")
         onBecomeActive()
     }
 
     @Synchronized
     override fun doBecomeInactive() {
         if (isDead) return
-        if (logging) log("onBecomeInactive")
+        log("onBecomeInactive")
         onBecomeInactive()
     }
 
     @Synchronized
     override fun doEnterBackground() {
         if (isDead) return
-        if (logging) log("onEnterBackground")
+        log("onEnterBackground")
         onEnterBackground()
     }
 
     @Synchronized
     override fun doTearDown() {
         if (isDead) return
-        if (logging) log("onTearDown")
+        log("onTearDown")
         onTearDown()
         deinitialize()
         isDead = true
@@ -131,7 +131,7 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.INITIALIZED
-                        if (logging) log("onInitializationSuccess")
+                        log("onInitializationSuccess")
                         onInitializationSuccess()
                     }
                 },
@@ -141,7 +141,7 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.DEINITIALIZED
-                        if (logging) log("onInitializationFailure: error = $error")
+                        log("onInitializationFailure: error = $error")
                         onInitializationFailure(error)
                     }
                 }
@@ -162,7 +162,7 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.DEINITIALIZED
-                        if (logging) log("onDeinitializationSuccess")
+                        log("onDeinitializationSuccess")
                         onDeinitializationSuccess()
                     }
                 },
@@ -172,7 +172,7 @@ abstract class Controller : Logging, Gateway, Routable {
                             return@synchronized
                         }
                         state = State.INITIALIZED
-                        if (logging) log("onDeinitializationFailure: error = $error")
+                        log("onDeinitializationFailure: error = $error")
                         onDeinitializationFailure(error)
                     }
                 },

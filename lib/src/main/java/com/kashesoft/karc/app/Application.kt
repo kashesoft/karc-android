@@ -13,7 +13,6 @@ import android.arch.lifecycle.ProcessLifecycleOwner
 import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.CallSuper
-import android.util.Log
 import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
@@ -34,10 +33,11 @@ private typealias KarcActivity = com.kashesoft.karc.app.Activity<*, *>
 abstract class Application<out R : Router> : DaggerApplication(), Logging,
         LifecycleObserver, Application.ActivityLifecycleCallbacks, Routable {
 
-    protected open val logging = false
+    override val logging = true
+    open val loggingLifecycle = false
 
     private fun log(message: String) {
-        Log.v(name, ":::::::::::::::$message:::::::::::::::")
+        if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
     }
 
     //region <==========|Lifecycle|==========>
@@ -53,7 +53,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     @CallSuper
     override fun onCreate() {
-        if (logging) log("onCreate")
+        log("onCreate")
         super.onCreate()
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         registerActivityLifecycleCallbacks(this)
@@ -63,7 +63,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     @Synchronized
     protected fun onStart() {
-        if (logging) log("onStart")
+        log("onStart")
         inForeground = true
 
         gateways.toList().forEach {
@@ -77,7 +77,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     @Synchronized
     private fun onResume() {
-        if (logging) log("onResume")
+        log("onResume")
         isActive = true
 
         gateways.toList().forEach {
@@ -91,7 +91,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     @Synchronized
     private fun onPause() {
-        if (logging) log("onPause")
+        log("onPause")
         isActive = false
 
         onBecomeInactive()
@@ -106,7 +106,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     @Synchronized
     protected fun onStop() {
-        if (logging) log("onStop")
+        log("onStop")
         inForeground = false
 
         onEnterBackground()
@@ -317,25 +317,25 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         return when (query.path) {
             Route.Path.PRESENTER_SET_UP -> {
                 val presenterClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                if (logging) log("Set up ${presenterClass.simpleName}")
+                log("Set up ${presenterClass.simpleName}")
                 setUpPresenter(presenterClass, query.params)
                 true
             }
             Route.Path.PRESENTER_TEAR_DOWN -> {
                 val presenterClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                if (logging) log("Tear down ${presenterClass.simpleName}")
+                log("Tear down ${presenterClass.simpleName}")
                 tearDownPresenter(presenterClass)
                 true
             }
             Route.Path.GATEWAY_SET_UP -> {
                 val gatewayClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                if (logging) log("Set up ${gatewayClass.simpleName}")
+                log("Set up ${gatewayClass.simpleName}")
                 setUpGateway(gatewayClass, query.params)
                 true
             }
             Route.Path.GATEWAY_TEAR_DOWN -> {
                 val gatewayClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                if (logging) log("Tear down ${gatewayClass.simpleName}")
+                log("Tear down ${gatewayClass.simpleName}")
                 tearDownGateway(gatewayClass)
                 true
             }
@@ -344,7 +344,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
                 if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
                 val intent = Intent(currentActivity, activityClass)
-                if (logging) log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
+                log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
                 currentActivity.startActivity(intent)
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
@@ -355,7 +355,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
                 val intent = Intent(currentActivity, activityClass)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                if (logging) log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
+                log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
                 currentActivity.startActivity(intent)
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
@@ -364,7 +364,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 val currentActivity = resumedActivityRef?.get() ?: return false
                 val activityClass: Class<*>? = (query.params[Route.Param.COMPONENT_CLASS] as? KClass<*>)?.java
                 if (activityClass != null && !currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
-                if (logging) log("Finish ${currentActivity::class.simpleName}")
+                log("Finish ${currentActivity::class.simpleName}")
                 currentActivity.finish()
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
@@ -373,7 +373,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
                 val currentActivity = resumedActivityRef?.get() ?: return false
                 val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
                 if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
-                if (logging) log("Finish ${currentActivity::class.simpleName} except ${activityClass.kotlin.simpleName}")
+                log("Finish ${currentActivity::class.simpleName} except ${activityClass.kotlin.simpleName}")
                 currentActivity.finish()
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true

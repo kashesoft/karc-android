@@ -12,6 +12,8 @@ import kotlin.reflect.KClass
 
 open class Router : Logging {
 
+    override val logging = true
+
     companion object {
         const val DEFAULT_ROUTED_QUERY_DISMISS_DELAY = 2000L
         const val DEFAULT_REMAINING_ROUTE_DISMISS_DELAY = 2000L

@@ -7,7 +7,6 @@ package com.kashesoft.karc.app
 import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.annotation.CallSuper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,18 +24,19 @@ import javax.inject.Provider
 abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
         Logging, Presentable, Routable {
 
+    override val logging = true
+    open val loggingLifecycle = false
+
+    private fun log(message: String) {
+        if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
+    }
+
     override val application: Application<*>
         get() =  activity?.application as Application<*>
 
     @Suppress("UNCHECKED_CAST")
     private val viewModel: ViewModel<P>
         get() = ViewModelProviders.of(this).get(ViewModel::class.java) as ViewModel<P>
-
-    protected open val logging = false
-
-    private fun log(message: String) {
-        Log.v(name, ":::::::::::::::$message:::::::::::::::")
-    }
 
     //region <==========|Lifecycle|==========>
 
@@ -49,13 +49,13 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     @CallSuper
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        if (logging) log("onCreateView")
+        log("onCreateView")
         return prepareView(inflater, container)
     }
 
     @CallSuper
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (logging) log("onViewCreated")
+        log("onViewCreated")
         super.onViewCreated(view, savedInstanceState)
         onLoad()
         listenLayout()
@@ -64,13 +64,13 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
 
     @CallSuper
     override fun onStart() {
-        if (logging) log("onStart")
+        log("onStart")
         super.onStart()
     }
 
     @CallSuper
     override fun onResume() {
-        if (logging) log("onResume")
+        log("onResume")
         attachCompanionRouter()
         super.onResume()
         if (layoutIsCompleted) {
@@ -80,7 +80,7 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
 
     @CallSuper
     override fun onPause() {
-        if (logging) log("onPause")
+        log("onPause")
         becomeInactive()
         super.onPause()
         detachCompanionRouter()
@@ -88,13 +88,13 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
 
     @CallSuper
     override fun onStop() {
-        if (logging) log("onStop")
+        log("onStop")
         super.onStop()
     }
 
     @CallSuper
     override fun onDestroyView() {
-        if (logging) log("onDestroyView")
+        log("onDestroyView")
         super.onDestroyView()
         detachCompanionPresenter()
     }
@@ -115,13 +115,13 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     }
 
     private fun onLoad() {
-        if (logging) log("viewDidLoad")
+        log("viewDidLoad")
         viewDidLoad()
     }
 
     private fun onLayout() {
         layoutIsCompleted = true
-        if (logging) log("viewDidLayout: (view.width = ${view!!.width}, view.height = ${view!!.height})")
+        log("viewDidLayout: (view.width = ${view!!.width}, view.height = ${view!!.height})")
         viewDidLayout()
         if (isResumed) {
             becomeActive()

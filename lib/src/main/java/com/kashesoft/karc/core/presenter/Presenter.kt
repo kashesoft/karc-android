@@ -4,7 +4,6 @@
 
 package com.kashesoft.karc.core.presenter
 
-import android.util.Log
 import com.kashesoft.karc.core.interactor.Interaction
 import com.kashesoft.karc.core.interactor.InteractionListener
 import com.kashesoft.karc.core.interactor.InteractionStatus
@@ -17,13 +16,14 @@ abstract class Presenter(
         private vararg val interactors: Interactor
 ) : Logging, InteractionListener<Any> {
 
-    protected open val logging = false
-
-    private var isDead = false
+    override val logging = true
+    open val loggingLifecycle = false
 
     private fun log(message: String) {
-        Log.v(name, ":::::::::::::::$message:::::::::::::::")
+        if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
     }
+
+    private var isDead = false
 
     //region <==========|Lifecycle|==========>
 
@@ -42,7 +42,7 @@ abstract class Presenter(
     @Synchronized
     internal fun doSetUp(params: Map<String, Any>) {
         if (isDead) return
-        if (logging) log("onSetUp: params = $params")
+        log("onSetUp: params = $params")
         addInteractionListener(this)
         onSetUp(params)
     }
@@ -50,35 +50,35 @@ abstract class Presenter(
     @Synchronized
     internal fun doEnterForeground() {
         if (isDead) return
-        if (logging) log("onEnterForeground")
+        log("onEnterForeground")
         onEnterForeground()
     }
 
     @Synchronized
     internal fun doBecomeActive() {
         if (isDead) return
-        if (logging) log("onBecomeActive")
+        log("onBecomeActive")
         onBecomeActive()
     }
 
     @Synchronized
     internal fun doBecomeInactive() {
         if (isDead) return
-        if (logging) log("onBecomeInactive")
+        log("onBecomeInactive")
         onBecomeInactive()
     }
 
     @Synchronized
     internal fun doEnterBackground() {
         if (isDead) return
-        if (logging) log("onEnterBackground")
+        log("onEnterBackground")
         onEnterBackground()
     }
 
     @Synchronized
     internal fun doTearDown() {
         if (isDead) return
-        if (logging) log("onTearDown")
+        log("onTearDown")
         removeInteractionListener(this)
         onTearDown()
         detachAllPresentable()
@@ -120,14 +120,14 @@ abstract class Presenter(
 
     fun <V : Presentable> attachPresentable(presentable: V) {
         presentables.add(presentable)
-        if (logging) log("onPresentableAttached: $presentable")
+        log("onPresentableAttached: $presentable")
         onPresentableAttached(presentable)
     }
 
     fun <V : Presentable> detachPresentable(presentable: V) {
         val detached = presentables.remove(presentable)
         if (!detached) return
-        if (logging) log("onPresentableDetached: $presentable")
+        log("onPresentableDetached: $presentable")
         onPresentableDetached(presentable)
     }
 
@@ -175,7 +175,7 @@ abstract class Presenter(
     }
 
     final override fun onInteractionStatus(interactionStatus: InteractionStatus<Any>) {
-        if (logging) log("onInteractionStatus[$interactionStatus]")
+        log("onInteractionStatus[$interactionStatus]")
         when (interactionStatus) {
             is InteractionStatus.Start -> {
                 onInteractionStart(interactionStatus.interaction)

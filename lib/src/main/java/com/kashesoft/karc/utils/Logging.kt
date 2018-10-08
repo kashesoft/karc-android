@@ -11,24 +11,26 @@ interface Logging {
     val name: String
         get() = this::class.simpleName!!
 
+    val logging: Boolean
+
     fun logVerbose(message: String) {
-        Log.v(name, message)
+        if (logging) Log.v(name, message)
     }
 
     fun logDebug(message: String) {
-        Log.d(name, message)
+        if (logging) Log.d(name, message)
     }
 
     fun logInfo(message: String) {
-        Log.i(name, message)
+        if (logging) Log.i(name, message)
     }
 
     fun logWarn(message: String) {
-        Log.w(name, message)
+        if (logging) Log.w(name, message)
     }
 
     fun logError(message: String) {
-        Log.e(name, message)
+        if (logging) Log.e(name, message)
     }
 
 }
