@@ -44,28 +44,28 @@ open class UserPresenter(
         }
     }
 
-    override fun onInteractionStarted(interaction: Interaction<*>) {
+    override fun onInteractionStart(interaction: Interaction<Any>) {
         startProgress()
     }
 
-    override fun onInteractionNext(interaction: Interaction<*>, data: Any) {
+    override fun onInteractionSuccess(interaction: Interaction<Any>, data: Any) {
         val user = data as? User ?: return
         updateProgress(user.progress)
     }
 
-    override fun onInteractionCompleted(interaction: Interaction<*>) {
+    override fun onInteractionFinish(interaction: Interaction<Any>) {
 
     }
 
-    override fun onInteractionError(interaction: Interaction<*>, error: Throwable) {
+    override fun onInteractionFailure(interaction: Interaction<Any>, error: Throwable) {
 
     }
 
-    override fun onInteractionDisposed(interaction: Interaction<*>) {
+    override fun onInteractionCancel(interaction: Interaction<Any>) {
 
     }
 
-    override fun onInteractionStopped(interaction: Interaction<*>) {
+    override fun onInteractionStop(interaction: Interaction<Any>) {
         finishProgress()
     }
 

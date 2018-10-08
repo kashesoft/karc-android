@@ -4,46 +4,54 @@
 
 package com.kashesoft.karc.core.interactor
 
-import io.reactivex.Observable
-import io.reactivex.Scheduler
-import io.reactivex.disposables.Disposable
-import io.reactivex.observers.DisposableObserver
 import java.lang.ref.WeakReference
 
-class Interaction<R> constructor(
+abstract class Interaction<R> constructor(
         interactor: Interactor,
-        private val observableGenerator: () -> Observable<R>,
-        private val onNext: ((output: R) -> Unit)?,
-        private val onComplete: (() -> Unit)?,
-        private val onError: ((error: Throwable) -> Unit)?,
-        private val observableScheduler: Scheduler,
-        private val observerScheduler: Scheduler,
         vararg val tags: String
 ) {
 
     private val interactor: WeakReference<Interactor> = WeakReference(interactor)
-    private var subscription: Disposable? = null
+    private var interactable: Interactable? = null
     private val listeners: MutableList<InteractionListener<R>> = mutableListOf()
 
     @Synchronized
     fun start() {
-        onInteractionResult(InteractionState.started(this))
+        onInteractionStatus(InteractionStatus.Start(this))
     }
 
     @Synchronized
-    fun dispose() {
-        if (subscription?.isDisposed == false) {
-            subscription?.dispose()
-            onInteractionResult(InteractionState.disposed(this))
-            onInteractionResult(InteractionState.stopped(this))
+    fun succeed(data: R) {
+        onInteractionStatus(InteractionStatus.Success(this, data))
+    }
+
+    @Synchronized
+    fun finish() {
+        onInteractionStatus(InteractionStatus.Finish(this))
+        onInteractionStatus(InteractionStatus.Stop(this))
+    }
+
+    @Synchronized
+    fun fail(error: Throwable) {
+        error.printStackTrace()
+        onInteractionStatus(InteractionStatus.Failure(this, error))
+        onInteractionStatus(InteractionStatus.Stop(this))
+    }
+
+    @Synchronized
+    fun cancel() {
+        if (interactable?.isCanceled() == false) {
+            interactable?.cancel()
+            onInteractionStatus(InteractionStatus.Cancel(this))
+            onInteractionStatus(InteractionStatus.Stop(this))
         }
     }
 
     @Synchronized
-    fun isStarted(): Boolean = subscription != null
+    fun isStarted(): Boolean = interactable != null
 
     @Synchronized
-    fun isStopped(): Boolean = subscription == null
+    fun isStopped(): Boolean = interactable == null
 
     @Synchronized
     internal fun addListener(listener: InteractionListener<R>) {
@@ -56,54 +64,31 @@ class Interaction<R> constructor(
     }
 
     @Synchronized
-    private fun onInteractionResult(interactionState: InteractionState<R>) {
+    protected fun onInteractionStatus(interactionStatus: InteractionStatus<R>) {
         val interactor = this.interactor.get() ?: return
-        if (interactionState.status == InteractionState.Status.STARTED) {
+        if (interactionStatus is InteractionStatus.Start) {
             try {
-                subscription = generateSubscription()
+                interactable = generateInteractable()
             } catch (error: Throwable) {
                 error.printStackTrace()
-                publishInteractionState(InteractionState.error(this, error))
+                publishInteractionStatus(InteractionStatus.Failure(this, error))
                 return
             }
-            interactor.attachInteraction(this)
+            interactor.attachInteraction(this as Interaction<Any>)
         }
-        publishInteractionState(interactionState)
-        if (interactionState.status == InteractionState.Status.STOPPED) {
-            interactor.detachInteraction(this)
-            subscription = null
+        publishInteractionStatus(interactionStatus)
+        if (interactionStatus is InteractionStatus.Stop) {
+            interactor.detachInteraction(this as Interaction<Any>)
+            interactable = null
         }
     }
 
-    private fun publishInteractionState(interactionState: InteractionState<R>) {
+    private fun publishInteractionStatus(interactionStatus: InteractionStatus<R>) {
         for (listener in listeners) {
-            listener.onInteractionResult(interactionState)
+            listener.onInteractionStatus(interactionStatus)
         }
     }
 
-    private fun generateSubscription(): Disposable {
-        return observableGenerator()
-                .subscribeOn(observableScheduler)
-                .observeOn(observerScheduler)
-                .subscribeWith(
-                        object : DisposableObserver<R>() {
-                            override fun onNext(data: R) {
-                                onInteractionResult(InteractionState.next(this@Interaction, data))
-                                onNext?.invoke(data)
-                            }
-                            override fun onComplete() {
-                                onInteractionResult(InteractionState.completed(this@Interaction))
-                                onInteractionResult(InteractionState.stopped(this@Interaction))
-                                onComplete?.invoke()
-                            }
-                            override fun onError(error: Throwable) {
-                                error.printStackTrace()
-                                onInteractionResult(InteractionState.error(this@Interaction, error))
-                                onInteractionResult(InteractionState.stopped(this@Interaction))
-                                onError?.invoke(error)
-                            }
-                        }
-                )
-    }
+    protected abstract fun generateInteractable(): Interactable
 
 }

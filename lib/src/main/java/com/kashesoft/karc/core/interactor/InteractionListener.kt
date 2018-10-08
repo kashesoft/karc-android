@@ -4,6 +4,6 @@
 
 package com.kashesoft.karc.core.interactor
 
-interface InteractionListener<in R> {
-    fun onInteractionResult(interactionState: InteractionState<R>)
+interface InteractionListener<R> {
+    fun onInteractionStatus(interactionStatus: InteractionStatus<R>)
 }

@@ -5,43 +5,18 @@
 package com.kashesoft.karc.core.interactor
 
 import com.kashesoft.karc.utils.Logging
-import io.reactivex.Observable
-import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
 
 abstract class Interactor : Logging {
 
-    private val interactions: MutableList<Interaction<*>> = mutableListOf()
-    private val listeners: MutableList<InteractionListener<Any?>> = mutableListOf()
-
-    fun <R> start(
-            observableGenerator: () -> Observable<R>,
-            onNext: ((output: R) -> Unit)? = null,
-            onComplete: (() -> Unit)? = null,
-            onError: ((error: Throwable) -> Unit)? = null,
-            observableScheduler: Scheduler = Schedulers.io(),
-            observerScheduler: Scheduler = AndroidSchedulers.mainThread(),
-            vararg tags: String
-    ) {
-        Interaction(
-                this,
-                observableGenerator,
-                onNext,
-                onComplete,
-                onError,
-                observableScheduler,
-                observerScheduler,
-                *tags
-        ).start()
-    }
+    private val interactions: MutableList<Interaction<Any>> = mutableListOf()
+    private val listeners: MutableList<InteractionListener<Any>> = mutableListOf()
 
     @Synchronized
-    fun dispose(vararg tags: String) {
+    fun cancel(vararg tags: String) {
         if (tags.isEmpty()) {
-            interactions.toList().forEach { it.dispose() }
+            interactions.toList().forEach { it.cancel() }
         } else {
-            interactions.filter { it.tags.any { tags.contains(it) } }.forEach { it.dispose() }
+            interactions.filter { it.tags.any { tags.contains(it) } }.forEach { it.cancel() }
         }
     }
 
@@ -55,25 +30,25 @@ abstract class Interactor : Logging {
     }
 
     @Synchronized
-    fun addListener(listener: InteractionListener<Any?>, vararg tags: String) {
+    fun addListener(listener: InteractionListener<Any>, vararg tags: String) {
         interactions.filter { it.tags.any { tags.contains(it) } }.forEach { it.addListener(listener) }
         listeners.add(listener)
     }
 
     @Synchronized
-    fun removeListener(listener: InteractionListener<Any?>, vararg tags: String) {
+    fun removeListener(listener: InteractionListener<Any>, vararg tags: String) {
         interactions.filter { it.tags.any { tags.contains(it) } }.forEach { it.removeListener(listener) }
         listeners.remove(listener)
     }
 
     @Synchronized
-    internal fun attachInteraction(interaction: Interaction<*>) {
+    internal fun attachInteraction(interaction: Interaction<Any>) {
         interactions.add(interaction)
         listeners.forEach { interaction.addListener(it) }
     }
 
     @Synchronized
-    internal fun detachInteraction(interaction: Interaction<*>) {
+    internal fun detachInteraction(interaction: Interaction<Any>) {
         listeners.forEach { interaction.removeListener(it) }
         interactions.remove(interaction)
     }

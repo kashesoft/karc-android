@@ -7,7 +7,7 @@ package com.kashesoft.karc.core.presenter
 import android.util.Log
 import com.kashesoft.karc.core.interactor.Interaction
 import com.kashesoft.karc.core.interactor.InteractionListener
-import com.kashesoft.karc.core.interactor.InteractionState
+import com.kashesoft.karc.core.interactor.InteractionStatus
 import com.kashesoft.karc.core.interactor.Interactor
 import com.kashesoft.karc.utils.Logging
 import kotlin.reflect.KClass
@@ -15,7 +15,7 @@ import kotlin.reflect.full.isSubclassOf
 
 abstract class Presenter(
         private vararg val interactors: Interactor
-) : Logging, InteractionListener<Any?> {
+) : Logging, InteractionListener<Any> {
 
     protected open val logging = false
 
@@ -143,88 +143,59 @@ abstract class Presenter(
 
     //region <==========|Interactors|==========>
 
-    protected open fun onInteractionStarted(interaction: Interaction<*>) {}
+    protected open fun onInteractionStart(interaction: Interaction<Any>) {}
 
-    protected open fun onInteractionNext(interaction: Interaction<*>, data: Any) {}
+    protected open fun onInteractionSuccess(interaction: Interaction<Any>, data: Any) {}
 
-    protected open fun onInteractionCompleted(interaction: Interaction<*>) {}
+    protected open fun onInteractionFailure(interaction: Interaction<Any>, error: Throwable) {}
 
-    protected open fun onInteractionError(interaction: Interaction<*>, error: Throwable) {}
+    protected open fun onInteractionFinish(interaction: Interaction<Any>) {}
 
-    protected open fun onInteractionDisposed(interaction: Interaction<*>) {}
+    protected open fun onInteractionCancel(interaction: Interaction<Any>) {}
 
-    protected open fun onInteractionStopped(interaction: Interaction<*>) {}
+    protected open fun onInteractionStop(interaction: Interaction<Any>) {}
 
     @Synchronized
-    private fun addInteractionListener(listener: InteractionListener<Any?>) {
+    private fun addInteractionListener(listener: InteractionListener<Any>) {
         interactors.forEach { it.addListener(listener) }
     }
 
     @Synchronized
-    private fun removeInteractionListener(listener: InteractionListener<Any?>) {
+    private fun removeInteractionListener(listener: InteractionListener<Any>) {
         interactors.forEach { it.removeListener(listener) }
     }
 
     @Synchronized
     fun disposeInteractions(vararg tags: String) {
-        interactors.forEach { it.dispose(*tags) }
+        interactors.forEach { it.cancel(*tags) }
     }
 
     fun isLoading(vararg tags: String): Boolean {
         return interactors.any { it.isLoading(*tags) }
     }
 
-    override fun onInteractionResult(interactionState: InteractionState<Any?>) {
-        when (interactionState.status) {
-            InteractionState.Status.STARTED -> {
-                doInteractionStarted(interactionState.interaction)
+    final override fun onInteractionStatus(interactionStatus: InteractionStatus<Any>) {
+        if (logging) log("onInteractionStatus[$interactionStatus]")
+        when (interactionStatus) {
+            is InteractionStatus.Start -> {
+                onInteractionStart(interactionStatus.interaction)
             }
-            InteractionState.Status.NEXT -> {
-                doInteractionNext(interactionState.interaction, interactionState.data!!)
+            is InteractionStatus.Success -> {
+                onInteractionSuccess(interactionStatus.interaction, interactionStatus.data)
             }
-            InteractionState.Status.COMPLETED -> {
-                doInteractionCompleted(interactionState.interaction)
+            is InteractionStatus.Failure -> {
+                onInteractionFailure(interactionStatus.interaction, interactionStatus.error)
             }
-            InteractionState.Status.ERROR -> {
-                doInteractionError(interactionState.interaction, interactionState.error!!)
+            is InteractionStatus.Finish -> {
+                onInteractionFinish(interactionStatus.interaction)
             }
-            InteractionState.Status.DISPOSED -> {
-                doInteractionDisposed(interactionState.interaction)
+            is InteractionStatus.Cancel -> {
+                onInteractionCancel(interactionStatus.interaction)
             }
-            InteractionState.Status.STOPPED -> {
-                doInteractionStopped(interactionState.interaction)
+            is InteractionStatus.Stop -> {
+                onInteractionStop(interactionStatus.interaction)
             }
         }
-    }
-
-    private fun doInteractionStarted(interaction: Interaction<*>) {
-        if (logging) log("onInteractionStarted[${interaction::class.simpleName}]")
-        onInteractionStarted(interaction)
-    }
-
-    private fun doInteractionNext(interaction: Interaction<*>, data: Any) {
-        if (logging) log("onInteractionNext[${interaction::class.simpleName}, data=$data]")
-        onInteractionNext(interaction, data)
-    }
-
-    private fun doInteractionCompleted(interaction: Interaction<*>) {
-        if (logging) log("onInteractionCompleted[${interaction::class.simpleName}]")
-        onInteractionCompleted(interaction)
-    }
-
-    private fun doInteractionError(interaction: Interaction<*>, error: Throwable) {
-        if (logging) log("onInteractionError[${interaction::class.simpleName}, error=$error]")
-        onInteractionError(interaction, error)
-    }
-
-    private fun doInteractionDisposed(interaction: Interaction<*>) {
-        if (logging) log("onInteractionDisposed[${interaction::class.simpleName}]")
-        onInteractionDisposed(interaction)
-    }
-
-    private fun doInteractionStopped(interaction: Interaction<*>) {
-        if (logging) log("onInteractionStopped[${interaction::class.simpleName}]")
-        onInteractionStopped(interaction)
     }
 
     //endregion
