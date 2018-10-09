@@ -210,10 +210,10 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         val gateway = gateways.firstOrNull {
             it::class.isSubclassOf(gatewayClass)
         } ?: return
-        if (isActive) {
+        if (gateway.isActive) {
             gateway.doBecomeInactive()
         }
-        if (inForeground) {
+        if (gateway.inForeground) {
             gateway.doEnterBackground()
         }
         gateway.doTearDown()
@@ -289,10 +289,10 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         val presenter = presenters.firstOrNull {
             it::class.isSubclassOf(presenterClass)
         } ?: return
-        if (isActive) {
+        if (presenter.isActive) {
             presenter.doBecomeInactive()
         }
-        if (inForeground) {
+        if (presenter.inForeground) {
             presenter.doEnterBackground()
         }
         presenter.doTearDown()

@@ -27,6 +27,10 @@ abstract class GatewayImpl : Logging, Gateway, Routable {
 
     //region <==========|Lifecycle|==========>
 
+    override var inForeground = false
+
+    override var isActive = false
+
     open fun onSetUp(params: Map<String, Any>) {}
 
     open fun onEnterForeground() {}
@@ -51,6 +55,7 @@ abstract class GatewayImpl : Logging, Gateway, Routable {
     override fun doEnterForeground() {
         if (isDead) return
         log("onEnterForeground")
+        inForeground = true
         onEnterForeground()
     }
 
@@ -58,6 +63,7 @@ abstract class GatewayImpl : Logging, Gateway, Routable {
     override fun doBecomeActive() {
         if (isDead) return
         log("onBecomeActive")
+        isActive = true
         onBecomeActive()
     }
 
@@ -65,6 +71,7 @@ abstract class GatewayImpl : Logging, Gateway, Routable {
     override fun doBecomeInactive() {
         if (isDead) return
         log("onBecomeInactive")
+        isActive = false
         onBecomeInactive()
     }
 
@@ -72,6 +79,7 @@ abstract class GatewayImpl : Logging, Gateway, Routable {
     override fun doEnterBackground() {
         if (isDead) return
         log("onEnterBackground")
+        inForeground = false
         onEnterBackground()
     }
 

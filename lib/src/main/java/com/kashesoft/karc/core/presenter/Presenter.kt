@@ -27,6 +27,12 @@ abstract class Presenter(
 
     //region <==========|Lifecycle|==========>
 
+    var inForeground: Boolean = false
+        private set
+
+    var isActive: Boolean = false
+        private set
+
     open fun onSetUp(params: Map<String, Any>) {}
 
     open fun onEnterForeground() {}
@@ -51,6 +57,7 @@ abstract class Presenter(
     internal fun doEnterForeground() {
         if (isDead) return
         log("onEnterForeground")
+        inForeground = true
         onEnterForeground()
     }
 
@@ -58,6 +65,7 @@ abstract class Presenter(
     internal fun doBecomeActive() {
         if (isDead) return
         log("onBecomeActive")
+        isActive = true
         onBecomeActive()
     }
 
@@ -65,6 +73,7 @@ abstract class Presenter(
     internal fun doBecomeInactive() {
         if (isDead) return
         log("onBecomeInactive")
+        isActive = false
         onBecomeInactive()
     }
 
@@ -72,6 +81,7 @@ abstract class Presenter(
     internal fun doEnterBackground() {
         if (isDead) return
         log("onEnterBackground")
+        inForeground = false
         onEnterBackground()
     }
 
