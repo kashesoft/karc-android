@@ -121,7 +121,7 @@ abstract class DialogFragment<P : Presenter, out R : Router> : DaggerAppCompatDi
 
     private fun onLayout() {
         layoutIsCompleted = true
-        log("viewDidLayout: (view.width = ${view!!.width}, view.height = ${view!!.height})")
+        log("viewDidLayout: (view.width = ${view?.width}, view.height = ${view?.height})")
         viewDidLayout()
         if (isResumed) {
             becomeActive()
