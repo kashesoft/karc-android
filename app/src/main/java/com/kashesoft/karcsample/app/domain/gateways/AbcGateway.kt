@@ -4,7 +4,7 @@
 
 package com.kashesoft.karcsample.app.domain.gateways
 
-import com.kashesoft.karc.core.interactor.Gateway
+import com.kashesoft.karc.core.gateway.Gateway
 import com.kashesoft.karcsample.app.domain.entities.User
 import io.reactivex.Observable
 

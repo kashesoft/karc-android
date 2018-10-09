@@ -2,14 +2,14 @@
  * Copyright (C) 2018 Kashesoft
  */
 
-package com.kashesoft.karcsample.app.data.controllers
+package com.kashesoft.karcsample.app.data.gateways
 
-import com.kashesoft.karc.app.Controller
+import com.kashesoft.karc.core.gateway.GatewayImpl
 import com.kashesoft.karcsample.app.domain.entities.User
-import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
+import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 import io.reactivex.Observable
 
-class XyzController : Controller(), XyzGateway {
+class AbcGatewayImpl : GatewayImpl(), AbcGateway {
 
     override val logging = true
 

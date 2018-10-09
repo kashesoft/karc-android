@@ -2,7 +2,7 @@
  * Copyright (C) 2018 Kashesoft
  */
 
-package com.kashesoft.karc.core.interactor
+package com.kashesoft.karc.core.gateway
 
 interface Gateway {
 

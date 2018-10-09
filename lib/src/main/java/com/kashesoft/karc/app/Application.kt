@@ -13,7 +13,7 @@ import android.arch.lifecycle.ProcessLifecycleOwner
 import android.content.Intent
 import android.os.Bundle
 import android.support.annotation.CallSuper
-import com.kashesoft.karc.core.interactor.Gateway
+import com.kashesoft.karc.core.gateway.Gateway
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query

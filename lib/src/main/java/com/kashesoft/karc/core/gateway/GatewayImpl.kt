@@ -2,16 +2,15 @@
  * Copyright (C) 2018 Kashesoft
  */
 
-package com.kashesoft.karc.app
+package com.kashesoft.karc.core.gateway
 
-import com.kashesoft.karc.core.interactor.Gateway
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Logging
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
-abstract class Controller : Logging, Gateway, Routable {
+abstract class GatewayImpl : Logging, Gateway, Routable {
 
     override val logging = true
     open val loggingLifecycle = false
