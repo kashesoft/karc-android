@@ -105,7 +105,7 @@ abstract class Presenter(
 
     inline fun <reified V : Presentable> presentable(presentableClass: KClass<V>): V? {
         return getPresentables().firstOrNull {
-            it::class.isSubclassOf(presentableClass)
+            presentableClass.java.isAssignableFrom(it::class.java)
         } as? V
     }
 

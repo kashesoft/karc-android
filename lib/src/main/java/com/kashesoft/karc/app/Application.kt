@@ -26,7 +26,6 @@ import java.lang.ref.WeakReference
 import javax.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
-import kotlin.reflect.full.isSubclassOf
 
 private typealias KarcActivity = com.kashesoft.karc.app.Activity<*, *>
 
@@ -186,13 +185,13 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     @Synchronized
     inline fun <reified G : Gateway> gateway(gatewayClass: KClass<G>): G? {
         return getGateways().firstOrNull {
-            it::class.isSubclassOf(gatewayClass)
+            gatewayClass.java.isAssignableFrom(it::class.java)
         } as? G
     }
 
     @Synchronized
     fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any>) {
-        if (gateways.any { it::class.isSubclassOf(gatewayClass) }) return
+        if (gateways.any { gatewayClass.java.isAssignableFrom(it::class.java) }) return
         val gatewayProvider = gatewayProviders.toList().firstOrNull { it.first == gatewayClass }?.second
         val gateway = if (gatewayProvider != null) gatewayProvider.get() else gatewayClass.createInstance() as Gateway
         gateways.add(gateway)
@@ -208,7 +207,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     @Synchronized
     fun tearDownGateway(gatewayClass: KClass<*>) {
         val gateway = gateways.firstOrNull {
-            it::class.isSubclassOf(gatewayClass)
+            gatewayClass.java.isAssignableFrom(it::class.java)
         } ?: return
         if (gateway.isActive) {
             gateway.doBecomeInactive()
@@ -238,7 +237,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         presentableForPresenterClassesMap[presentable]?.add(presenterClass)
 
         val presenter: Presenter = presenters.firstOrNull {
-            it::class.isSubclassOf(presenterClass)
+            presenterClass.java.isAssignableFrom(it::class.java)
         } ?: return
         presenter.attachPresentable(presentable)
     }
@@ -251,7 +250,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
         }
 
         val presenter: Presenter = presenters.firstOrNull {
-            it::class.isSubclassOf(presenterClass)
+            presenterClass.java.isAssignableFrom(it::class.java)
         } ?: return
         presenter.detachPresentable(presentable)
     }
@@ -264,13 +263,13 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     @Synchronized
     inline fun <reified P : Presenter> presenter(presenterClass: KClass<P>): P? {
         return getPresenters().firstOrNull {
-            it::class.isSubclassOf(presenterClass)
+            presenterClass.java.isAssignableFrom(it::class.java)
         } as? P
     }
 
     @Synchronized
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any>) {
-        if (presenters.any { it::class.isSubclassOf(presenterClass) }) return
+        if (presenters.any { presenterClass.java.isAssignableFrom(it::class.java) }) return
         val presenterProvider = presenterProviders.toList().firstOrNull { it.first == presenterClass }?.second
         val presenter = if (presenterProvider != null) presenterProvider.get() else presenterClass.createInstance() as Presenter
         presenters.add(presenter)
@@ -287,7 +286,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
     @Synchronized
     fun tearDownPresenter(presenterClass: KClass<*>) {
         val presenter = presenters.firstOrNull {
-            it::class.isSubclassOf(presenterClass)
+            presenterClass.java.isAssignableFrom(it::class.java)
         } ?: return
         if (presenter.isActive) {
             presenter.doBecomeInactive()
