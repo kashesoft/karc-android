@@ -20,7 +20,7 @@ import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.core.router.Route
 import com.kashesoft.karc.core.router.Router
-import com.kashesoft.karc.utils.Logging
+import com.kashesoft.karc.utils.*
 import dagger.android.support.DaggerApplication
 import java.lang.ref.WeakReference
 import javax.inject.Provider
@@ -380,6 +380,55 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
             else -> false
         }
     }
+
+    //endregion
+
+    //region <==========|Profiling|==========>
+
+    init {
+        MethodProfiler.eventListener = { event ->
+            onMethodProfilerEvent(event)
+        }
+        ObjectProfiler.eventListener = { event ->
+            onObjectProfilerEvent(event)
+        }
+    }
+
+    protected fun configureMethodProfiler(
+            sampleStepMillis: Long = MethodProfiler.DEFAULT_SAMPLE_STEP_TIME,
+            defaultBlockingMaxTime: Long = MethodProfiler.DEFAULT_BLOCKING_MAX_TIME,
+            defaultRecursionMaxDepth: Long = MethodProfiler.DEFAULT_RECURSION_MAX_DEPTH
+    ) {
+        MethodProfiler.sampleStepTime = sampleStepMillis
+        MethodProfiler.defaultBlockingMaxTime = defaultBlockingMaxTime
+        MethodProfiler.defaultRecursionMaxDepth = defaultRecursionMaxDepth
+    }
+
+    protected fun activateMethodProfiler() {
+        MethodProfiler.activate()
+    }
+
+    protected fun deactivateMethodProfiler() {
+        MethodProfiler.deactivate()
+    }
+
+    protected open fun onMethodProfilerEvent(event: ProfileMethodEvent) {}
+
+    protected fun configureObjectProfiler(
+            sampleStepMillis: Long = ObjectProfiler.DEFAULT_SAMPLE_STEP_TIME
+    ) {
+        ObjectProfiler.sampleStepTime = sampleStepMillis
+    }
+
+    protected fun activateObjectProfiler() {
+        ObjectProfiler.activate()
+    }
+
+    protected fun deactivateObjectProfiler() {
+        ObjectProfiler.deactivate()
+    }
+
+    protected open fun onObjectProfilerEvent(event: ProfileObjectEvent) {}
 
     //endregion
 

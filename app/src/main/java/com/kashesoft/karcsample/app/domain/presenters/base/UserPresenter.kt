@@ -30,6 +30,11 @@ open class UserPresenter(
     fun readUsers(userIds: List<Int>) {
         startProgress()
         userInteractor.loadUsers(userIds)
+        userInteractor.loadUsers2(userIds)
+    }
+
+    fun badRecursion() {
+        userInteractor.badRecursion()
     }
 
     override fun onBecomeActive() {

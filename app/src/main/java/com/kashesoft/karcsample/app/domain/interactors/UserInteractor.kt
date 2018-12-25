@@ -24,5 +24,30 @@ class UserInteractor : RxInteractor() {
                 onError = onError
         )
     }
+    fun loadUsers2(
+            userIds: List<Int>,
+            onNext: ((output: User) -> Unit)? = null,
+            onComplete: (() -> Unit)? = null,
+            onError: ((error: Throwable) -> Unit)? = null
+    ) {
+        start(
+                { App.instance.gateway(AbcGateway::class)!!.fetchUsers2(userIds) },
+                onNext = onNext,
+                onComplete = onComplete,
+                onError = onError
+        )
+    }
+
+    fun badRecursion(
+            onComplete: (() -> Unit)? = null,
+            onError: ((error: Throwable) -> Unit)? = null
+    ) {
+        start(
+                { App.instance.gateway(AbcGateway::class)!!.badRecursion().toObservable<Nothing>() },
+                onComplete = onComplete,
+                onError = onError
+        )
+    }
+
 
 }

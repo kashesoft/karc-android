@@ -5,8 +5,11 @@
 package com.kashesoft.karcsample.app.user.fragments
 
 import android.app.ProgressDialog
+import android.os.Bundle
 import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.utils.Layout
+import com.kashesoft.karc.utils.profileObjectDidCreate
+import com.kashesoft.karc.utils.profileObjectWillDestroy
 import com.kashesoft.karcsample.R
 import com.kashesoft.karcsample.app.domain.presenters.FirstPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
@@ -18,6 +21,12 @@ import javax.inject.Provider
 @Layout(res = R.layout.fragment_first)
 class FirstFragment : Fragment<FirstPresenter, MainRouter>(), UserPresenter.View {
 
+    override val loggingLifecycle = true
+
+    companion object {
+        var cached: Any? = null
+    }
+
     @Inject
     override lateinit var presenterProvider: Provider<FirstPresenter>
 
@@ -25,6 +34,17 @@ class FirstFragment : Fragment<FirstPresenter, MainRouter>(), UserPresenter.View
     override lateinit var router: MainRouter
 
     private lateinit var progressDialog: ProgressDialog
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        profileObjectDidCreate()
+        super.onCreate(savedInstanceState)
+        cached = this
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        profileObjectWillDestroy()
+    }
 
     override fun viewDidLoad() {
         //

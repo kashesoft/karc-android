@@ -73,6 +73,9 @@ class MainActivity : Activity<MainPresenter, MainRouter>(), UserPresenter.View {
             val userIds = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
             presenter?.readUsers(userIds)
         }
+        button2.setOnClickListener {
+            presenter?.badRecursion()
+        }
         //
         val progressDialog = ProgressDialog(this)
         progressDialog.setMessage("Loading")

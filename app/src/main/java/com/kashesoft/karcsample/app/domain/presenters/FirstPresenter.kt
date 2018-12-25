@@ -13,4 +13,8 @@ class FirstPresenter @Inject
 constructor(
         router: MainRouter,
         private val userInteractor: UserInteractor = UserInteractor()
-) : UserPresenter(userInteractor)
+) : UserPresenter(userInteractor) {
+
+    override val loggingLifecycle = true
+
+}

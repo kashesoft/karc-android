@@ -5,6 +5,8 @@
     <string name="title_notifications">Notifications</string>
     <string name="title_first">First</string>
     <string name="load_users">Load users</string>
+    <string name="deadlock">Deadlock</string>
+    <string name="bad_recursion">Bad recursion</string>
     <string name="title_second">Second</string>
     <string name="next">Next</string>
     <string name="set_up_abc_gateway">Set up abc gateway</string>

@@ -6,6 +6,7 @@ package com.kashesoft.karcsample.app
 
 import com.kashesoft.karc.app.Application
 import com.kashesoft.karc.core.router.Routable
+import com.kashesoft.karc.utils.*
 import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
 import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
@@ -31,6 +32,8 @@ class App : Application<MainRouter>(), Routable {
 
     override fun onCreate() {
         instance = this
+        activateMethodProfiler()
+        activateObjectProfiler()
         super.onCreate()
         setGatewayProvider(abcGatewayProvider)
         setGatewayProvider(xyzGatewayProvider)
@@ -44,6 +47,34 @@ class App : Application<MainRouter>(), Routable {
                 .application(this)
                 .build()
         return appComponent
+    }
+
+    override fun onMethodProfilerEvent(event: ProfileMethodEvent) {
+        when (event) {
+            is DeadlockEvent, is BadRecursionEvent -> {
+                logError(event.toString())
+            }
+            is InconsistentMethodProfilerEvent -> {
+                logWarn(event.toString())
+            }
+        }
+    }
+
+    override fun onObjectProfilerEvent(event: ProfileObjectEvent) {
+        when (event) {
+            is MemoryLeakEvent -> {
+                logError(event.toString())
+            }
+            is InconsistentObjectProfilerEvent -> {
+                logWarn(event.toString())
+            }
+            is DidCreateEvent, is WillDestroyEvent, is DidDestroyEvent -> {
+                logInfo(event.toString())
+            }
+            is GcEvent -> {
+                logDebug(event.toString())
+            }
+        }
     }
 
 }
