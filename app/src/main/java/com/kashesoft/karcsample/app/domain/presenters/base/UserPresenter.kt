@@ -20,7 +20,7 @@ open class UserPresenter(
         fun refreshProgress(percent: Int)
     }
 
-    override val logging = true
+    override val loggingLifecycle = true
 
     private val view
         get() = presentable(View::class)
