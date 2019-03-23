@@ -4,7 +4,7 @@
 
 package com.kashesoft.karcsample.app.user.activities
 
-import android.support.design.widget.BottomNavigationView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.widget.Toast
 import com.kashesoft.karc.app.Activity
 import com.kashesoft.karc.app.get

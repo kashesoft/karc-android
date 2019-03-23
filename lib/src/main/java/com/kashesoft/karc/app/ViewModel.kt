@@ -4,7 +4,7 @@
 
 package com.kashesoft.karc.app
 
-import android.arch.lifecycle.ViewModel
+import androidx.lifecycle.ViewModel
 import com.kashesoft.karc.core.presenter.Presenter
 
 class ViewModel<P : Presenter> : ViewModel() {
