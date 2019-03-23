@@ -10,7 +10,7 @@ import com.kashesoft.karc.utils.Logging
 import java.util.*
 import kotlin.reflect.KClass
 
-open class Router : Logging {
+abstract class Router : Logging {
 
     override val logging = true
 

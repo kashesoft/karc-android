@@ -15,13 +15,11 @@ import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
-import com.kashesoft.karc.core.router.Router
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
-import dagger.android.support.DaggerFragment
-import javax.inject.Provider
+import com.kashesoft.karc.utils.Provider
 
-abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
+abstract class Fragment<P : Presenter> : android.support.v4.app.Fragment(),
         Logging, Presentable, Routable {
 
     override val logging = true
@@ -30,9 +28,6 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
     private fun log(message: String) {
         if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
     }
-
-    override val application: Application<*>
-        get() =  activity?.application as Application<*>
 
     @Suppress("UNCHECKED_CAST")
     private val viewModel: ViewModel<P>
@@ -160,7 +155,7 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
         val presenter = viewModel.getPresenter()
         if (presenter == null) {
             val presenter = presenterProvider?.get() ?: return
-            val params = router.paramsForComponent(this::class)
+            val params =  Application.instance.router.paramsForComponent(this::class)
             presenter.attachPresentable(this)
             viewModel.setPresenter(presenter, params)
             this.presenter = presenter
@@ -179,14 +174,12 @@ abstract class Fragment<P : Presenter, out R : Router> : DaggerFragment(),
 
     //region <==========|Routing|==========>
 
-    protected abstract val router: R
-
     private fun attachCompanionRouter() {
-        router.attachRoutable(this)
+        Application.instance.router.attachRoutable(this)
     }
 
     private fun detachCompanionRouter() {
-        router.detachRoutable(this)
+        Application.instance.router.detachRoutable(this)
     }
 
     @CallSuper

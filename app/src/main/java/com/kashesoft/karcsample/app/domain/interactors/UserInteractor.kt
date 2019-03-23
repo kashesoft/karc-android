@@ -4,7 +4,7 @@
 
 package com.kashesoft.karcsample.app.domain.interactors
 
-import com.kashesoft.karcsample.app.App
+import com.kashesoft.karc.app.get
 import com.kashesoft.karcsample.app.domain.entities.User
 import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 import com.kashesoft.karcsample.app.domain.interactors.base.RxInteractor
@@ -18,7 +18,7 @@ class UserInteractor : RxInteractor() {
             onError: ((error: Throwable) -> Unit)? = null
     ) {
         start(
-                { App.instance.gateway(AbcGateway::class)!!.fetchUsers(userIds) },
+                { AbcGateway::class.get.fetchUsers(userIds) },
                 onNext = onNext,
                 onComplete = onComplete,
                 onError = onError
@@ -31,7 +31,7 @@ class UserInteractor : RxInteractor() {
             onError: ((error: Throwable) -> Unit)? = null
     ) {
         start(
-                { App.instance.gateway(AbcGateway::class)!!.fetchUsers2(userIds) },
+                { AbcGateway::class.get.fetchUsers2(userIds) },
                 onNext = onNext,
                 onComplete = onComplete,
                 onError = onError
@@ -43,11 +43,10 @@ class UserInteractor : RxInteractor() {
             onError: ((error: Throwable) -> Unit)? = null
     ) {
         start(
-                { App.instance.gateway(AbcGateway::class)!!.badRecursion().toObservable<Nothing>() },
+                { AbcGateway::class.get.badRecursion().toObservable<Nothing>() },
                 onComplete = onComplete,
                 onError = onError
         )
     }
-
 
 }

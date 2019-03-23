@@ -8,18 +8,16 @@ import android.app.ProgressDialog
 import android.os.Bundle
 import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.utils.Layout
+import com.kashesoft.karc.utils.Provider
 import com.kashesoft.karc.utils.profileObjectDidCreate
 import com.kashesoft.karc.utils.profileObjectWillDestroy
 import com.kashesoft.karcsample.R
 import com.kashesoft.karcsample.app.domain.presenters.FirstPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
-import com.kashesoft.karcsample.app.domain.routers.MainRouter
 import kotlinx.android.synthetic.main.fragment_first.*
-import javax.inject.Inject
-import javax.inject.Provider
 
 @Layout(res = R.layout.fragment_first)
-class FirstFragment : Fragment<FirstPresenter, MainRouter>(), UserPresenter.View {
+class FirstFragment : Fragment<FirstPresenter>(), UserPresenter.View {
 
     override val loggingLifecycle = true
 
@@ -27,11 +25,7 @@ class FirstFragment : Fragment<FirstPresenter, MainRouter>(), UserPresenter.View
         var cached: Any? = null
     }
 
-    @Inject
-    override lateinit var presenterProvider: Provider<FirstPresenter>
-
-    @Inject
-    override lateinit var router: MainRouter
+    override val presenterProvider = Provider<FirstPresenter> { FirstPresenter() }
 
     private lateinit var progressDialog: ProgressDialog
 

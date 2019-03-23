@@ -10,7 +10,6 @@ import com.kashesoft.karc.core.interactor.InteractionStatus
 import com.kashesoft.karc.core.interactor.Interactor
 import com.kashesoft.karc.utils.Logging
 import kotlin.reflect.KClass
-import kotlin.reflect.full.isSubclassOf
 
 abstract class Presenter(
         private vararg val interactors: Interactor

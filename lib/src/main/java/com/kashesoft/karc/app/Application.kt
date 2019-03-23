@@ -21,16 +21,42 @@ import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.core.router.Route
 import com.kashesoft.karc.core.router.Router
 import com.kashesoft.karc.utils.*
-import dagger.android.support.DaggerApplication
 import java.lang.ref.WeakReference
-import javax.inject.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-private typealias KarcActivity = com.kashesoft.karc.app.Activity<*, *>
+private typealias KarcActivity = com.kashesoft.karc.app.Activity<*>
+private typealias KarcApplication = com.kashesoft.karc.app.Application<*>
 
-abstract class Application<out R : Router> : DaggerApplication(), Logging,
+inline val <reified A : com.kashesoft.karc.app.Application<R>, R : Router> KClass<A>.get: A
+    get() = com.kashesoft.karc.app.Application.instance as A
+
+inline val <reified R : Router> KClass<R>.get: R
+    get() = com.kashesoft.karc.app.Application.instance.router as R
+
+inline val <reified G : Gateway> KClass<G>.get: G
+    get() = com.kashesoft.karc.app.Application.instance.gateway(this)!!
+
+inline val <reified G : Gateway> KClass<G>.getOrNull: G?
+    get() = com.kashesoft.karc.app.Application.instance.gateway(this)
+
+inline val <reified P : Presenter> KClass<P>.get: P
+    get() = com.kashesoft.karc.app.Application.instance.presenter(this)!!
+
+inline val <reified P : Presenter> KClass<P>.getOrNull: P?
+    get() = com.kashesoft.karc.app.Application.instance.presenter(this)
+
+abstract class Application<out R : Router> : Application(), Logging,
         LifecycleObserver, Application.ActivityLifecycleCallbacks, Routable {
+
+    companion object {
+        val instance: KarcApplication by lazy { instanceProvider() }
+        private lateinit var instanceProvider: () -> KarcApplication
+    }
+
+    init {
+        instanceProvider = { this }
+    }
 
     override val logging = true
     open val loggingLifecycle = false
@@ -309,7 +335,7 @@ abstract class Application<out R : Router> : DaggerApplication(), Logging,
 
     //region <==========|Router|==========>
 
-    protected abstract val router: R
+    abstract val router: R
 
     @CallSuper
     override fun route(query: Query): Boolean {

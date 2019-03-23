@@ -7,22 +7,16 @@ package com.kashesoft.karcsample.app.user.fragments
 import android.app.ProgressDialog
 import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.utils.Layout
+import com.kashesoft.karc.utils.Provider
 import com.kashesoft.karcsample.R
 import com.kashesoft.karcsample.app.domain.presenters.SecondPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
-import com.kashesoft.karcsample.app.domain.routers.MainRouter
 import kotlinx.android.synthetic.main.fragment_second.*
-import javax.inject.Inject
-import javax.inject.Provider
 
 @Layout(res = R.layout.fragment_second)
-class SecondFragment : Fragment<SecondPresenter, MainRouter>(), UserPresenter.View {
+class SecondFragment : Fragment<SecondPresenter>(), UserPresenter.View {
 
-    @Inject
-    override lateinit var presenterProvider: Provider<SecondPresenter>
-
-    @Inject
-    override lateinit var router: MainRouter
+    override val presenterProvider = Provider<SecondPresenter> { SecondPresenter() }
 
     private lateinit var progressDialog: ProgressDialog
 

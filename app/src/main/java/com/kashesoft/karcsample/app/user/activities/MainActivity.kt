@@ -6,64 +6,62 @@ package com.kashesoft.karcsample.app.user.activities
 
 import android.app.ProgressDialog
 import com.kashesoft.karc.app.Activity
+import com.kashesoft.karc.app.get
 import com.kashesoft.karc.utils.Layout
+import com.kashesoft.karc.utils.Provider
 import com.kashesoft.karcsample.R
+import com.kashesoft.karcsample.app.AppRouter
 import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
 import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
 import com.kashesoft.karcsample.app.domain.presenters.MainPresenter
 import com.kashesoft.karcsample.app.domain.presenters.XyzPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
-import com.kashesoft.karcsample.app.domain.routers.MainRouter
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.inject.Inject
-import javax.inject.Provider
 
 @Layout(res = R.layout.activity_main)
-class MainActivity : Activity<MainPresenter, MainRouter>(), UserPresenter.View {
+class MainActivity : Activity<MainPresenter>(), UserPresenter.View {
 
-    @Inject override lateinit var presenterProvider: Provider<MainPresenter>
-
-    @Inject override lateinit var router: MainRouter
+    override val presenterProvider = Provider<MainPresenter> { MainPresenter() }
 
     private lateinit var progressDialog: ProgressDialog
 
     override fun viewDidLoad() {
         //
         setUpAbcGatewayButton.setOnClickListener {
-            router.setUpGateway(AbcGateway::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpGateway(AbcGateway::class, mapOf("string" to "test string")).route()
         }
         //
         tearDownAbcGatewayButton.setOnClickListener {
-            router.tearDownGateway(AbcGateway::class).route()
+            AppRouter::class.get.tearDownGateway(AbcGateway::class).route()
         }
         //
         setUpXyzGatewayButton.setOnClickListener {
-            router.setUpGateway(XyzGateway::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpGateway(XyzGateway::class, mapOf("string" to "test string")).route()
         }
         //
         tearDownXyzGatewayButton.setOnClickListener {
-            router.tearDownGateway(XyzGateway::class).route()
+            AppRouter::class.get.tearDownGateway(XyzGateway::class).route()
         }
         //
         setUpAbcPresenterButton.setOnClickListener {
-            router.setUpPresenter(AbcPresenter::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpPresenter(AbcPresenter::class, mapOf("string" to "test string")).route()
         }
         //
         tearDownAbcPresenterButton.setOnClickListener {
-            router.tearDownPresenter(AbcPresenter::class).route()
+            AppRouter::class.get.tearDownPresenter(AbcPresenter::class).route()
         }
         //
         setUpXyzPresenterButton.setOnClickListener {
-            router.setUpPresenter(XyzPresenter::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpPresenter(XyzPresenter::class, mapOf("string" to "test string")).route()
         }
         //
         tearDownXyzPresenterButton.setOnClickListener {
-            router.tearDownPresenter(XyzPresenter::class).route()
+            AppRouter::class.get.tearDownPresenter(XyzPresenter::class).route()
         }
         //
         nextButton.setOnClickListener {
-            router.startActivity(
+            AppRouter::class.get.startActivity(
                     DetailsActivity::class,
                     mapOf("string" to "test string", "number" to 123)
             ).route()

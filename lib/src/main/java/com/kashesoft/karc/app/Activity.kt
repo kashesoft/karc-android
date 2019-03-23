@@ -10,6 +10,7 @@ import android.support.annotation.AnimRes
 import android.support.annotation.AnimatorRes
 import android.support.annotation.CallSuper
 import android.support.annotation.IdRes
+import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -18,15 +19,16 @@ import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.core.router.Route
-import com.kashesoft.karc.core.router.Router
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
-import dagger.android.support.DaggerAppCompatActivity
-import javax.inject.Provider
+import com.kashesoft.karc.utils.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity(),
+private typealias KarcFragment = com.kashesoft.karc.app.Fragment<*>
+private typealias KarcDialogFragment = com.kashesoft.karc.app.DialogFragment<*>
+
+abstract class Activity<P : Presenter> : FragmentActivity(),
         Logging, Presentable, Routable {
 
     override val logging = true
@@ -35,9 +37,6 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     private fun log(message: String) {
         if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
     }
-
-    override val application: Application<*>
-        get() = applicationContext as Application<*>
 
     @Suppress("UNCHECKED_CAST")
     private val viewModel: ViewModel<P>
@@ -136,7 +135,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     internal fun enterForeground() {
         presenter?.doEnterForeground()
         supportFragmentManager.fragments.forEach {
-            val fragment = it as? Fragment<*, *> ?: return@forEach
+            val fragment = it as? KarcFragment ?: return@forEach
             fragment.enterForeground()
         }
     }
@@ -152,7 +151,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
     internal fun enterBackground() {
         presenter?.doEnterBackground()
         supportFragmentManager.fragments.forEach {
-            val fragment = it as? Fragment<*, *> ?: return@forEach
+            val fragment = it as? KarcFragment ?: return@forEach
             fragment.enterBackground()
         }
     }
@@ -169,7 +168,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         val presenter = viewModel.getPresenter()
         if (presenter == null) {
             val presenter = presenterProvider?.get() ?: return
-            val params = router.paramsForComponent(this::class)
+            val params = Application.instance.router.paramsForComponent(this::class)
             presenter.attachPresentable(this)
             viewModel.setPresenter(presenter, params)
             this.presenter = presenter
@@ -188,14 +187,12 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
 
     //region <==========|Router|==========>
 
-    protected abstract val router: R
-
     private fun attachCompanionRouter() {
-        router.attachRoutable(this)
+        Application.instance.router.attachRoutable(this)
     }
 
     internal fun detachCompanionRouter() {
-        router.detachRoutable(this)
+        Application.instance.router.detachRoutable(this)
     }
 
     @CallSuper
@@ -203,7 +200,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         return when (query.path) {
             Route.Path.FRAGMENT_SHOW_IN_CONTAINER -> {
                 @Suppress("UNCHECKED_CAST")
-                val fragmentClass: KClass<Fragment<*, *>> = query.params[Route.Param.COMPONENT_CLASS] as KClass<Fragment<*, *>>
+                val fragmentClass: KClass<KarcFragment> = query.params[Route.Param.COMPONENT_CLASS] as KClass<KarcFragment>
                 val fragmentContainer: Int = query.params[Route.Param.FRAGMENT_CONTAINER] as Int
                 if (hasViewWithId(fragmentContainer)) {
                     showFragmentInContainer(
@@ -219,13 +216,13 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
             }
             Route.Path.FRAGMENT_SHOW_AS_DIALOG -> {
                 @Suppress("UNCHECKED_CAST")
-                val fragmentClass: KClass<DialogFragment<*, *>> = query.params[Route.Param.COMPONENT_CLASS] as KClass<DialogFragment<*, *>>
+                val fragmentClass: KClass<KarcDialogFragment> = query.params[Route.Param.COMPONENT_CLASS] as KClass<KarcDialogFragment>
                 showFragmentAsDialog(fragmentClass)
                 true
             }
             Route.Path.FRAGMENT_HIDE_AS_DIALOG -> {
                 @Suppress("UNCHECKED_CAST")
-                val fragmentClass: KClass<DialogFragment<*, *>> = query.params[Route.Param.COMPONENT_CLASS] as KClass<DialogFragment<*, *>>
+                val fragmentClass: KClass<KarcDialogFragment> = query.params[Route.Param.COMPONENT_CLASS] as KClass<KarcDialogFragment>
                 hideFragmentAsDialog(fragmentClass)
                 true
             }
@@ -233,7 +230,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         }
     }
 
-    private fun <T : Fragment<*, *>> showFragmentInContainer(
+    private fun <T : KarcFragment> showFragmentInContainer(
             fragmentClass: KClass<T>,
             @IdRes containerViewId: Int,
             @AnimatorRes @AnimRes enterAnimation: Int,
@@ -258,7 +255,7 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
                 .commitNowAllowingStateLoss()
     }
 
-    private fun <T : DialogFragment<*, *>> showFragmentAsDialog(fragmentClass: KClass<T>) {
+    private fun <T : KarcDialogFragment> showFragmentAsDialog(fragmentClass: KClass<T>) {
         val fragmentTag = fragmentClass.simpleName!!
         val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag)
         if (currentFragmentWithTag != null) return
@@ -268,9 +265,9 @@ abstract class Activity<P : Presenter, out R : Router> : DaggerAppCompatActivity
         fragment.show(supportFragmentManager, fragmentTag)
     }
 
-    private fun <T : DialogFragment<*, *>> hideFragmentAsDialog(fragmentClass: KClass<T>) {
+    private fun <T : KarcDialogFragment> hideFragmentAsDialog(fragmentClass: KClass<T>) {
         val fragmentTag = fragmentClass.simpleName!!
-        val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag) as? DialogFragment<*, *> ?: return
+        val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag) as? KarcDialogFragment ?: return
 
         currentFragmentWithTag.dismissAllowingStateLoss()
     }
