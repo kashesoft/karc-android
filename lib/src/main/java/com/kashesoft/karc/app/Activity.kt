@@ -4,16 +4,16 @@
 
 package com.kashesoft.karc.app
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.annotation.AnimRes
 import androidx.annotation.AnimatorRes
 import androidx.annotation.CallSuper
 import androidx.annotation.IdRes
-import androidx.fragment.app.FragmentActivity
-import android.view.View
-import android.view.ViewGroup
-import android.view.ViewTreeObserver
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProviders
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
@@ -28,7 +28,7 @@ import kotlin.reflect.full.createInstance
 private typealias KarcFragment = com.kashesoft.karc.app.Fragment<*>
 private typealias KarcDialogFragment = com.kashesoft.karc.app.DialogFragment<*>
 
-abstract class Activity<P : Presenter> : androidx.fragment.app.FragmentActivity(),
+abstract class Activity<P : Presenter> : AppCompatActivity(),
         Logging, Presentable, Routable {
 
     override val logging = true

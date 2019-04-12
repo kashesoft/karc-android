@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.annotation.CallSuper
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
@@ -19,7 +20,7 @@ import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
 import com.kashesoft.karc.utils.Provider
 
-abstract class Fragment<P : Presenter> : androidx.fragment.app.Fragment(),
+abstract class Fragment<P : Presenter> : Fragment(),
         Logging, Presentable, Routable {
 
     override val logging = true

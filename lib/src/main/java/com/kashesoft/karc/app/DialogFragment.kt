@@ -4,13 +4,14 @@
 
 package com.kashesoft.karc.app
 
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
-import androidx.annotation.CallSuper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import androidx.annotation.CallSuper
+import androidx.fragment.app.DialogFragment
+import androidx.lifecycle.ViewModelProviders
 import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
@@ -19,7 +20,7 @@ import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
 import com.kashesoft.karc.utils.Provider
 
-abstract class DialogFragment<P : Presenter> : androidx.fragment.app.DialogFragment(),
+abstract class DialogFragment<P : Presenter> : DialogFragment(),
         Logging, Presentable, Routable {
 
     override val logging = true
