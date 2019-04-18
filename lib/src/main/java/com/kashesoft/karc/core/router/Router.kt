@@ -109,7 +109,7 @@ abstract class Router : Logging {
 
     @Synchronized
     internal fun paramsForComponent(componentClass: KClass<*>): Map<String, Any> {
-        val query: Query = routedQueries.firstOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
+        val query: Query = routedQueries.lastOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
         routedQueries.remove(query)
         val params = query.params.toMutableMap()
         params.remove(Route.Param.COMPONENT_CLASS)
