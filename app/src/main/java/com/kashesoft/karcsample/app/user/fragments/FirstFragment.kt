@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karcsample.app.user.fragments
@@ -8,7 +8,6 @@ import android.app.ProgressDialog
 import android.os.Bundle
 import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.utils.Layout
-import com.kashesoft.karc.utils.Provider
 import com.kashesoft.karc.utils.profileObjectDidCreate
 import com.kashesoft.karc.utils.profileObjectWillDestroy
 import com.kashesoft.karcsample.R
@@ -17,7 +16,7 @@ import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
 import kotlinx.android.synthetic.main.fragment_first.*
 
 @Layout(res = R.layout.fragment_first)
-class FirstFragment : Fragment<FirstPresenter>(), UserPresenter.View {
+class FirstFragment : Fragment<FirstPresenter>(FirstPresenter::class), UserPresenter.View {
 
     override val loggingLifecycle = true
 
@@ -25,14 +24,12 @@ class FirstFragment : Fragment<FirstPresenter>(), UserPresenter.View {
         var cached: Any? = null
     }
 
-    override val presenterProvider = Provider<FirstPresenter> { FirstPresenter() }
-
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         profileObjectDidCreate()
         super.onCreate(savedInstanceState)
-        cached = this
+        //cached = this
     }
 
     override fun onDestroyView() {

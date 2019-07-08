@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karc.app
@@ -18,9 +18,9 @@ import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
-import com.kashesoft.karc.utils.Provider
+import kotlin.reflect.KClass
 
-abstract class DialogFragment<P : Presenter> : DialogFragment(),
+abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<P>? = null) : DialogFragment(),
         Logging, Presentable, Routable {
 
     override val logging = true
@@ -36,7 +36,8 @@ abstract class DialogFragment<P : Presenter> : DialogFragment(),
 
     //region <==========|Lifecycle|==========>
 
-    private var layoutIsCompleted = false
+    var layoutIsCompleted = false
+        private set
 
     protected open fun viewDidLoad() {}
 
@@ -62,6 +63,7 @@ abstract class DialogFragment<P : Presenter> : DialogFragment(),
     override fun onStart() {
         log("onStart")
         super.onStart()
+        viewModel.onStart()
     }
 
     @CallSuper
@@ -69,15 +71,13 @@ abstract class DialogFragment<P : Presenter> : DialogFragment(),
         log("onResume")
         attachCompanionRouter()
         super.onResume()
-        if (layoutIsCompleted) {
-            becomeActive()
-        }
+        viewModel.onResume()
     }
 
     @CallSuper
     override fun onPause() {
         log("onPause")
-        becomeInactive()
+        viewModel.onPause(activity?.isChangingConfigurations ?: false)
         super.onPause()
         detachCompanionRouter()
     }
@@ -85,6 +85,7 @@ abstract class DialogFragment<P : Presenter> : DialogFragment(),
     @CallSuper
     override fun onStop() {
         log("onStop")
+        viewModel.onStop(activity?.isChangingConfigurations ?: false)
         super.onStop()
     }
 
@@ -119,29 +120,6 @@ abstract class DialogFragment<P : Presenter> : DialogFragment(),
         layoutIsCompleted = true
         log("viewDidLayout: (view.width = ${view?.width}, view.height = ${view?.height})")
         viewDidLayout()
-        if (isResumed) {
-            becomeActive()
-        }
-    }
-
-    @CallSuper
-    internal fun enterForeground() {
-        presenter?.doEnterForeground()
-    }
-
-    @CallSuper
-    private fun becomeActive() {
-        presenter?.doBecomeActive()
-    }
-
-    @CallSuper
-    private fun becomeInactive() {
-        presenter?.doBecomeInactive()
-    }
-
-    @CallSuper
-    internal fun enterBackground() {
-        presenter?.doEnterBackground()
     }
 
     //endregion
@@ -150,20 +128,16 @@ abstract class DialogFragment<P : Presenter> : DialogFragment(),
 
     protected var presenter: P? = null
         private set
-    protected open val presenterProvider: Provider<P>? = null
 
     private fun attachCompanionPresenter() {
-        val presenter = viewModel.getPresenter()
-        if (presenter == null) {
-            val presenter = presenterProvider?.get() ?: return
+        val presenterClass = presenterClass ?: return
+        if (viewModel.hasNoPresenter(presenterClass)) {
             val params = Application.instance.router.paramsForComponent(this::class)
-            presenter.attachPresentable(this)
-            viewModel.setPresenter(presenter, params)
-            this.presenter = presenter
-        } else {
-            presenter.attachPresentable(this)
-            this.presenter = presenter
+            viewModel.setPresenter(presenterClass, params)
         }
+        val presenter = viewModel.getPresenter()!!
+        presenter.attachPresentable(this)
+        this.presenter = presenter
     }
 
     private fun detachCompanionPresenter() {

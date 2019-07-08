@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Kashesoft
+ */
+
 package com.kashesoft.karc;
 
 import android.content.Context;

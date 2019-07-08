@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karcsample.app.user.activities
 
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import android.widget.Toast
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kashesoft.karc.app.Activity
 import com.kashesoft.karc.app.get
 import com.kashesoft.karc.app.getOrNull
@@ -15,13 +15,16 @@ import com.kashesoft.karcsample.app.AppRouter
 import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
 import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
 import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
+import com.kashesoft.karcsample.app.domain.presenters.DetailsPresenter
 import com.kashesoft.karcsample.app.domain.presenters.XyzPresenter
 import com.kashesoft.karcsample.app.user.fragments.FirstFragment
 import com.kashesoft.karcsample.app.user.fragments.SecondFragment
 import kotlinx.android.synthetic.main.activity_details.*
 
 @Layout(res = R.layout.activity_details)
-class DetailsActivity : Activity<Nothing>() {
+class DetailsActivity : Activity<DetailsPresenter>(DetailsPresenter::class) {
+
+    override val loggingLifecycle = true
 
     override fun viewDidLoad() {
         navigation.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->

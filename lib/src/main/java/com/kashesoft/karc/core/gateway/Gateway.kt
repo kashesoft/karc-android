@@ -1,25 +1,9 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karc.core.gateway
 
-interface Gateway {
+import com.kashesoft.karc.core.Component
 
-    val inForeground: Boolean
-    
-    val isActive: Boolean
-
-    fun doSetUp(params: Map<String, Any>)
-
-    fun doEnterForeground()
-
-    fun doBecomeActive()
-
-    fun doBecomeInactive()
-
-    fun doEnterBackground()
-
-    fun doTearDown()
-
-}
+interface Gateway : Component

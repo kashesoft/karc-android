@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karcsample.app.user.fragments
@@ -7,16 +7,13 @@ package com.kashesoft.karcsample.app.user.fragments
 import android.app.ProgressDialog
 import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.utils.Layout
-import com.kashesoft.karc.utils.Provider
 import com.kashesoft.karcsample.R
 import com.kashesoft.karcsample.app.domain.presenters.SecondPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
 import kotlinx.android.synthetic.main.fragment_second.*
 
 @Layout(res = R.layout.fragment_second)
-class SecondFragment : Fragment<SecondPresenter>(), UserPresenter.View {
-
-    override val presenterProvider = Provider<SecondPresenter> { SecondPresenter() }
+class SecondFragment : Fragment<SecondPresenter>(SecondPresenter::class), UserPresenter.View {
 
     private lateinit var progressDialog: ProgressDialog
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karcsample.app.user.activities
@@ -8,7 +8,6 @@ import android.app.ProgressDialog
 import com.kashesoft.karc.app.Activity
 import com.kashesoft.karc.app.get
 import com.kashesoft.karc.utils.Layout
-import com.kashesoft.karc.utils.Provider
 import com.kashesoft.karcsample.R
 import com.kashesoft.karcsample.app.AppRouter
 import com.kashesoft.karcsample.app.domain.gateways.AbcGateway
@@ -20,9 +19,9 @@ import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
 import kotlinx.android.synthetic.main.activity_main.*
 
 @Layout(res = R.layout.activity_main)
-class MainActivity : Activity<MainPresenter>(), UserPresenter.View {
+class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresenter.View {
 
-    override val presenterProvider = Provider<MainPresenter> { MainPresenter() }
+    override val loggingLifecycle = true
 
     private lateinit var progressDialog: ProgressDialog
 

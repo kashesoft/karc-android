@@ -1,10 +1,11 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karcsample.app
 
 import com.kashesoft.karc.app.Application
+import com.kashesoft.karc.app.setProvider
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.*
 import com.kashesoft.karcsample.app.data.gateways.AbcGatewayImpl
@@ -14,13 +15,15 @@ import com.kashesoft.karcsample.app.domain.gateways.XyzGateway
 
 class App : Application<AppRouter>(), Routable {
 
+    override val loggingLifecycle = true
+
     override val router: AppRouter = AppRouter()
 
     override fun onCreate() {
         activateMethodProfiler()
         activateObjectProfiler()
-        setGatewayProvider(Provider<AbcGateway> { AbcGatewayImpl() })
-        setGatewayProvider(Provider<XyzGateway> { XyzGatewayImpl() })
+        AbcGateway::class.setProvider(Provider { AbcGatewayImpl() })
+        XyzGateway::class.setProvider(Provider { XyzGatewayImpl() })
         super.onCreate()
     }
 

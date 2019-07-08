@@ -1,100 +1,36 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karc.core.presenter
 
+import com.kashesoft.karc.core.Component
+import com.kashesoft.karc.core.Core
 import com.kashesoft.karc.core.interactor.Interaction
 import com.kashesoft.karc.core.interactor.InteractionListener
 import com.kashesoft.karc.core.interactor.InteractionStatus
 import com.kashesoft.karc.core.interactor.Interactor
-import com.kashesoft.karc.utils.Logging
+import com.kashesoft.karc.core.log
 import kotlin.reflect.KClass
 
 abstract class Presenter(
         private vararg val interactors: Interactor
-) : Logging, InteractionListener<Any> {
+) : Component, InteractionListener<Any> {
 
     override val logging = true
-    open val loggingLifecycle = false
-
-    private fun log(message: String) {
-        if (loggingLifecycle) logVerbose(":::::::::::::::$message:::::::::::::::")
-    }
-
-    private var isDead = false
+    override val loggingLifecycle = false
 
     //region <==========|Lifecycle|==========>
 
-    var inForeground: Boolean = false
-        private set
-
-    var isActive: Boolean = false
-        private set
-
-    open fun onSetUp(params: Map<String, Any>) {}
-
-    open fun onEnterForeground() {}
-
-    open fun onBecomeActive() {}
-
-    open fun onBecomeInactive() {}
-
-    open fun onEnterBackground() {}
-
-    open fun onTearDown() {}
-
-    @Synchronized
-    internal fun doSetUp(params: Map<String, Any>) {
-        if (isDead) return
-        log("onSetUp: params = $params")
+    override fun willSetUp(params: Map<String, Any>) {
         addInteractionListener(this)
-        onSetUp(params)
+        attachPresentablesForPresenter(this)
     }
 
-    @Synchronized
-    internal fun doEnterForeground() {
-        if (isDead) return
-        log("onEnterForeground")
-        inForeground = true
-        onEnterForeground()
-    }
-
-    @Synchronized
-    internal fun doBecomeActive() {
-        if (isDead) return
-        log("onBecomeActive")
-        isActive = true
-        onBecomeActive()
-    }
-
-    @Synchronized
-    internal fun doBecomeInactive() {
-        if (isDead) return
-        log("onBecomeInactive")
-        isActive = false
-        onBecomeInactive()
-    }
-
-    @Synchronized
-    internal fun doEnterBackground() {
-        if (isDead) return
-        log("onEnterBackground")
-        inForeground = false
-        onEnterBackground()
-    }
-
-    @Synchronized
-    internal fun doTearDown() {
-        if (isDead) return
-        log("onTearDown")
+    override fun didTearDown() {
         removeInteractionListener(this)
-        onTearDown()
         detachAllPresentable()
-        isDead = true
     }
-
-    //endregion
 
     //region <==========|Presentables|==========>
 
@@ -208,5 +144,38 @@ abstract class Presenter(
     }
 
     //endregion
+
+    companion object {
+
+        private val presentableForPresenterClassesMap: MutableMap<Presentable, MutableSet<KClass<*>>> = mutableMapOf()
+
+        @Synchronized
+        internal fun attachPresentableToPresenterWithClass(presentable: Presentable, presenterClass: KClass<*>) {
+            if (presentableForPresenterClassesMap[presentable] == null) {
+                presentableForPresenterClassesMap[presentable] = mutableSetOf()
+            }
+            presentableForPresenterClassesMap[presentable]?.add(presenterClass)
+            val presenter: Presenter = Core.component(presenterClass) as? Presenter ?: return
+            presenter.attachPresentable(presentable)
+        }
+
+        @Synchronized
+        internal fun detachPresentableFromPresenterWithClass(presentable: Presentable, presenterClass: KClass<*>) {
+            presentableForPresenterClassesMap[presentable]?.remove(presenterClass)
+            if (presentableForPresenterClassesMap[presentable]?.isEmpty() == true) {
+                presentableForPresenterClassesMap.remove(presentable)
+            }
+            val presenter: Presenter = Core.component(presenterClass) as? Presenter ?: return
+            presenter.detachPresentable(presentable)
+        }
+
+        private fun attachPresentablesForPresenter(presenter: Presenter) {
+            presentableForPresenterClassesMap
+                    .filter { (_, presenterClasses) -> presenterClasses.any { it == presenter::class } }
+                    .map { it.key }
+                    .forEach { presenter.attachPresentable(it) }
+        }
+
+    }
 
 }

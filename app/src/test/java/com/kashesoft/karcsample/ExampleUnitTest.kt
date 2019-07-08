@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2019 Kashesoft
+ */
+
 package com.kashesoft.karcsample
 
 import org.junit.Test

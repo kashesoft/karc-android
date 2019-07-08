@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karc.utils

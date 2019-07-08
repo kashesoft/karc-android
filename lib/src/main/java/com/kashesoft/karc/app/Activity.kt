@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 Kashesoft
+ * Copyright (C) 2019 Kashesoft
  */
 
 package com.kashesoft.karc.app
@@ -21,14 +21,13 @@ import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.core.router.Route
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
-import com.kashesoft.karc.utils.Provider
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
-private typealias KarcFragment = com.kashesoft.karc.app.Fragment<*>
-private typealias KarcDialogFragment = com.kashesoft.karc.app.DialogFragment<*>
+private typealias KarcFragment = Fragment<*>
+private typealias KarcDialogFragment = DialogFragment<*>
 
-abstract class Activity<P : Presenter> : AppCompatActivity(),
+abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = null) : AppCompatActivity(),
         Logging, Presentable, Routable {
 
     override val logging = true
@@ -47,8 +46,8 @@ abstract class Activity<P : Presenter> : AppCompatActivity(),
 
     //region <==========|Lifecycle|==========>
 
-    private var layoutIsCompleted = false
-    private var isResumed = false
+    var layoutIsCompleted = false
+        private set
 
     protected open fun viewDidLoad() {}
 
@@ -56,7 +55,7 @@ abstract class Activity<P : Presenter> : AppCompatActivity(),
 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
-        log("onCreate")
+        log("onCreate isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
         super.onCreate(savedInstanceState)
         prepareView()
         onLoad()
@@ -66,39 +65,37 @@ abstract class Activity<P : Presenter> : AppCompatActivity(),
 
     @CallSuper
     override fun onStart() {
-        log("onStart")
+        log("onStart isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
         super.onStart()
+        viewModel.onStart()
     }
 
     @CallSuper
     override fun onResume() {
-        log("onResume")
-        isResumed = true
+        log("onResume isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
         attachCompanionRouter()
         super.onResume()
-        if (layoutIsCompleted) {
-            becomeActive()
-        }
+        viewModel.onResume()
     }
 
     @CallSuper
     override fun onPause() {
-        log("onPause")
-        becomeInactive()
+        log("onPause isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
+        viewModel.onPause(isChangingConfigurations)
         super.onPause()
         detachCompanionRouter()
-        isResumed = false
     }
 
     @CallSuper
     override fun onStop() {
-        log("onStop")
+        log("onStop isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
+        viewModel.onStop(isChangingConfigurations)
         super.onStop()
     }
 
     @CallSuper
     override fun onDestroy() {
-        log("onDestroy")
+        log("onDestroy isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
         super.onDestroy()
         detachCompanionPresenter()
     }
@@ -127,33 +124,6 @@ abstract class Activity<P : Presenter> : AppCompatActivity(),
         layoutIsCompleted = true
         log("viewDidLayout: (view.width = ${view.width}, view.height = ${view.height})")
         viewDidLayout()
-        if (isResumed) {
-            becomeActive()
-        }
-    }
-
-    internal fun enterForeground() {
-        presenter?.doEnterForeground()
-        supportFragmentManager.fragments.forEach {
-            val fragment = it as? KarcFragment ?: return@forEach
-            fragment.enterForeground()
-        }
-    }
-
-    private fun becomeActive() {
-        presenter?.doBecomeActive()
-    }
-
-    private fun becomeInactive() {
-        presenter?.doBecomeInactive()
-    }
-
-    internal fun enterBackground() {
-        presenter?.doEnterBackground()
-        supportFragmentManager.fragments.forEach {
-            val fragment = it as? KarcFragment ?: return@forEach
-            fragment.enterBackground()
-        }
     }
 
     //endregion
@@ -162,20 +132,16 @@ abstract class Activity<P : Presenter> : AppCompatActivity(),
 
     protected var presenter: P? = null
         private set
-    protected open val presenterProvider: Provider<P>? = null
 
     private fun attachCompanionPresenter() {
-        val presenter = viewModel.getPresenter()
-        if (presenter == null) {
-            val presenter = presenterProvider?.get() ?: return
+        val presenterClass = presenterClass ?: return
+        if (viewModel.hasNoPresenter(presenterClass)) {
             val params = Application.instance.router.paramsForComponent(this::class)
-            presenter.attachPresentable(this)
-            viewModel.setPresenter(presenter, params)
-            this.presenter = presenter
-        } else {
-            presenter.attachPresentable(this)
-            this.presenter = presenter
+            viewModel.setPresenter(presenterClass, params)
         }
+        val presenter = viewModel.getPresenter()!!
+        presenter.attachPresentable(this)
+        this.presenter = presenter
     }
 
     private fun detachCompanionPresenter() {
