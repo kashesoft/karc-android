@@ -8,6 +8,6 @@ import com.kashesoft.karc.core.router.Router
 
 class AppRouter : Router() {
 
-
+    override val loggingLifecycle = true
 
 }

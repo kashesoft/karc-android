@@ -100,6 +100,8 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
         detachCompanionPresenter()
     }
 
+    protected open fun willShowFragmentInContainer(fragment: KarcFragment, @IdRes containerViewId: Int) {}
+
     private fun prepareView() {
         val viewable = this::class.annotations.find { it is Layout } as? Layout ?: throw IllegalStateException("Layout is not found!")
         val layoutResId = viewable.res
@@ -214,6 +216,8 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
         supportFragmentManager.fragments
                 .filter { it.activity == this && (it.view?.parent as? ViewGroup)?.id == containerViewId }
                 .forEach { fragmentTransaction.remove(it) }
+
+        willShowFragmentInContainer(fragment, containerViewId)
 
         fragmentTransaction
                 .setCustomAnimations(enterAnimation, exitAnimation)

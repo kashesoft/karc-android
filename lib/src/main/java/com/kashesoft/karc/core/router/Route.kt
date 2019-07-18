@@ -28,6 +28,11 @@ class Route(private val router: Router) {
     }
 
     private val queries: MutableList<Query> = mutableListOf()
+    private val routedQueries: MutableList<Query> = mutableListOf()
+
+    override fun toString(): String {
+        return "${routedQueries.joinToString(" +++ ", transform = { "${it.path} | ${it.params}" })} >>> ${queries.joinToString(" +++ ", transform = { "${it.path} | ${it.params}" })}"
+    }
 
     fun route() {
         router.route(this)
@@ -41,8 +46,8 @@ class Route(private val router: Router) {
 
     fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.PRESENTER_SET_UP,
-                params + mapOf(Route.Param.COMPONENT_CLASS to presenterClass)
+                Path.PRESENTER_SET_UP,
+                params + mapOf(Param.COMPONENT_CLASS to presenterClass)
         )
         queries.add(query)
         return this
@@ -50,8 +55,8 @@ class Route(private val router: Router) {
 
     fun tearDownPresenter(presenterClass: KClass<*>): Route {
         val query = Query(
-                Route.Path.PRESENTER_TEAR_DOWN,
-                mapOf(Route.Param.COMPONENT_CLASS to presenterClass)
+                Path.PRESENTER_TEAR_DOWN,
+                mapOf(Param.COMPONENT_CLASS to presenterClass)
         )
         queries.add(query)
         return this
@@ -59,8 +64,8 @@ class Route(private val router: Router) {
 
     fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.GATEWAY_SET_UP,
-                params + mapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
+                Path.GATEWAY_SET_UP,
+                params + mapOf(Param.COMPONENT_CLASS to gatewayClass)
         )
         queries.add(query)
         return this
@@ -68,8 +73,8 @@ class Route(private val router: Router) {
 
     fun tearDownGateway(gatewayClass: KClass<*>): Route {
         val query = Query(
-                Route.Path.GATEWAY_TEAR_DOWN,
-                mapOf(Route.Param.COMPONENT_CLASS to gatewayClass)
+                Path.GATEWAY_TEAR_DOWN,
+                mapOf(Param.COMPONENT_CLASS to gatewayClass)
         )
         queries.add(query)
         return this
@@ -77,8 +82,8 @@ class Route(private val router: Router) {
 
     fun startActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.ACTIVITY_START,
-                params + mapOf(Route.Param.COMPONENT_CLASS to activityClass)
+                Path.ACTIVITY_START,
+                params + mapOf(Param.COMPONENT_CLASS to activityClass)
         )
         queries.add(query)
         return this
@@ -86,8 +91,8 @@ class Route(private val router: Router) {
 
     fun startActivityNewClear(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.ACTIVITY_START_NEW_CLEAR,
-                params + mapOf(Route.Param.COMPONENT_CLASS to activityClass)
+                Path.ACTIVITY_START_NEW_CLEAR,
+                params + mapOf(Param.COMPONENT_CLASS to activityClass)
         )
         queries.add(query)
         return this
@@ -95,8 +100,8 @@ class Route(private val router: Router) {
 
     fun finishActivity(activityClass: KClass<*>? = null): Route {
         val query = Query(
-                Route.Path.ACTIVITY_FINISH,
-                if (activityClass != null) mapOf(Route.Param.COMPONENT_CLASS to activityClass) else mapOf()
+                Path.ACTIVITY_FINISH,
+                if (activityClass != null) mapOf(Param.COMPONENT_CLASS to activityClass) else mapOf()
         )
         queries.add(query)
         return this
@@ -104,8 +109,8 @@ class Route(private val router: Router) {
 
     fun finishActivityExcept(activityClass: KClass<*>): Route {
         val query = Query(
-                Route.Path.ACTIVITY_FINISH_EXCEPT,
-                mapOf(Route.Param.COMPONENT_CLASS to activityClass)
+                Path.ACTIVITY_FINISH_EXCEPT,
+                mapOf(Param.COMPONENT_CLASS to activityClass)
         )
         queries.add(query)
         return this
@@ -113,10 +118,10 @@ class Route(private val router: Router) {
 
     fun showFragmentInContainer(fragmentClass: KClass<*>, fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.FRAGMENT_SHOW_IN_CONTAINER,
+                Path.FRAGMENT_SHOW_IN_CONTAINER,
                 params + mapOf(
-                        Route.Param.COMPONENT_CLASS to fragmentClass,
-                        Route.Param.FRAGMENT_CONTAINER to fragmentContainer
+                        Param.COMPONENT_CLASS to fragmentClass,
+                        Param.FRAGMENT_CONTAINER to fragmentContainer
                 )
         )
         queries.add(query)
@@ -125,9 +130,9 @@ class Route(private val router: Router) {
 
     fun showFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.FRAGMENT_SHOW_AS_DIALOG,
+                Path.FRAGMENT_SHOW_AS_DIALOG,
                 params + mapOf(
-                        Route.Param.COMPONENT_CLASS to fragmentClass
+                        Param.COMPONENT_CLASS to fragmentClass
                 )
         )
         queries.add(query)
@@ -136,9 +141,9 @@ class Route(private val router: Router) {
 
     fun hideFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
-                Route.Path.FRAGMENT_HIDE_AS_DIALOG,
+                Path.FRAGMENT_HIDE_AS_DIALOG,
                 params + mapOf(
-                        Route.Param.COMPONENT_CLASS to fragmentClass
+                        Param.COMPONENT_CLASS to fragmentClass
                 )
         )
         queries.add(query)
@@ -147,7 +152,8 @@ class Route(private val router: Router) {
 
     internal fun nextQuery(): Query? {
         if (queries.isNotEmpty()) {
-            queries.removeAt(0)
+            val routedQuery = queries.removeAt(0)
+            routedQueries.add(routedQuery)
             return queries.firstOrNull()
         } else {
             throw IllegalStateException("Route is over!")
@@ -159,5 +165,13 @@ class Route(private val router: Router) {
     internal fun isFinished() = queries.isEmpty()
 
     internal fun currentQuery() : Query? = queries.firstOrNull()
+
+    var timeout: Long = 0
+        private set
+
+    fun withTimeout(timeout: Long): Route {
+        this.timeout = timeout
+        return this
+    }
 
 }

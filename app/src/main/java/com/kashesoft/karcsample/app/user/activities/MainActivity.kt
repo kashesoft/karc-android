@@ -16,6 +16,7 @@ import com.kashesoft.karcsample.app.domain.presenters.AbcPresenter
 import com.kashesoft.karcsample.app.domain.presenters.MainPresenter
 import com.kashesoft.karcsample.app.domain.presenters.XyzPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
+import com.kashesoft.karcsample.app.user.fragments.SecondFragment
 import kotlinx.android.synthetic.main.activity_main.*
 
 @Layout(res = R.layout.activity_main)
@@ -63,7 +64,7 @@ class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresente
             AppRouter::class.get.startActivity(
                     DetailsActivity::class,
                     mapOf("string" to "test string", "number" to 123)
-            ).route()
+            ).showFragmentInContainer(SecondFragment::class, R.id.container).route()
         }
         //
         button.setOnClickListener {

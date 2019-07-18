@@ -13,19 +13,26 @@ import kotlin.reflect.KClass
 abstract class Router : Logging {
 
     override val logging = true
+    open val loggingLifecycle = false
 
-    companion object {
-        const val DEFAULT_ROUTED_QUERY_DISMISS_DELAY = 2000L
-        const val DEFAULT_REMAINING_ROUTE_DISMISS_DELAY = 2000L
+    private fun log(message: String) {
+        if (loggingLifecycle) logVerbose(message)
     }
 
     private val routables: MutableList<Routable> = mutableListOf()
-    private val remainingRoutes: Queue<Route> = ArrayDeque()
-    private var routedQueries = mutableListOf<Query>()
+    private val routes: Queue<Route> = ArrayDeque()
+
+    protected open fun onStartRoute(route: Route) {}
+
+    protected open fun onStopRoute(route: Route) {}
+
+    protected open fun onFinishRoute(route: Route) {}
 
     fun attachRoutable(routable: Routable) {
         routables.add(routable)
-        dispatchRoutes()
+        Handler(Looper.getMainLooper()).post {
+            dispatchRoutes()
+        }
     }
 
     fun detachRoutable(routable: Routable) {
@@ -34,7 +41,7 @@ abstract class Router : Logging {
 
     @Synchronized
     fun clear(): Router {
-        remainingRoutes.clear()
+        routes.clear()
         return this
     }
 
@@ -88,11 +95,14 @@ abstract class Router : Logging {
 
     @Synchronized
     internal fun route(route: Route) {
+        if (route.isFinished()) {
+            finishRoute(route)
+            return
+        }
+        startRoute(route)
         var query: Query
         do {
-            query = route.currentQuery() ?: return
-            routedQueries.add(query)
-            dismissRoutedQueryIfNeededAfterDelay(query, DEFAULT_ROUTED_QUERY_DISMISS_DELAY)
+            query = route.currentQuery() ?: break
         } while (
                 if (routables.any { it.route(query) }) {
                     route.nextQuery()
@@ -101,16 +111,16 @@ abstract class Router : Logging {
                     false
                 }
         )
-        if (route.isNotFinished()) {
-            remainingRoutes.offer(route)
-            dismissRemainingRouteIfNeededAfterDelay(route, DEFAULT_REMAINING_ROUTE_DISMISS_DELAY)
+        if (route.isFinished()) {
+            finishRoute(route)
+        } else {
+            stopRoute(route)
         }
     }
 
     @Synchronized
     internal fun paramsForComponent(componentClass: KClass<*>): Map<String, Any> {
-        val query: Query = routedQueries.lastOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
-        routedQueries.remove(query)
+        val query: Query = routes.mapNotNull { it.currentQuery() }.lastOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
         val params = query.params.toMutableMap()
         params.remove(Route.Param.COMPONENT_CLASS)
         params.remove(Route.Param.FRAGMENT_CONTAINER)
@@ -119,37 +129,44 @@ abstract class Router : Logging {
 
     @Synchronized
     private fun dispatchRoutes() {
-        val routes = ArrayDeque(remainingRoutes)
-        remainingRoutes.clear()
+        val routes = ArrayDeque(routes)
+        this.routes.clear()
         while (routes.size > 0) {
             val route = routes.remove()
             route(route)
         }
     }
 
-    private fun dismissRoutedQueryIfNeededAfterDelay(routedQuery: Query, delay: Long) {
-        Handler(Looper.getMainLooper()).postDelayed({
-            dismissRoutedQueryIfNeeded(routedQuery)
-        }, delay)
+    private fun startRoute(route: Route) {
+        log("onStartRoute $route")
+        onStartRoute(route)
+        routes.offer(route)
     }
 
-    @Synchronized
-    private fun dismissRoutedQueryIfNeeded(routedQuery: Query) {
-        if (routedQueries.contains(routedQuery)) {
-            routedQueries.remove(routedQuery)
+    private fun stopRoute(route: Route) {
+        log("onStopRoute $route")
+        onStopRoute(route)
+        if (route.timeout > 0) {
+            dismissRouteIfNeededAfterTimeout(route)
         }
     }
 
-    private fun dismissRemainingRouteIfNeededAfterDelay(remainingRoute: Route, delay: Long) {
+    private fun finishRoute(route: Route) {
+        log("onFinishRoute $route")
+        onFinishRoute(route)
+        routes.remove(route)
+    }
+
+    private fun dismissRouteIfNeededAfterTimeout(route: Route) {
         Handler(Looper.getMainLooper()).postDelayed({
-            dismissRemainingRouteIfNeeded(remainingRoute)
-        }, delay)
+            dismissRouteIfNeeded(route)
+        }, route.timeout)
     }
 
     @Synchronized
-    private fun dismissRemainingRouteIfNeeded(remainingRoute: Route) {
-        if (remainingRoutes.contains(remainingRoute)) {
-            remainingRoutes.remove(remainingRoute)
+    private fun dismissRouteIfNeeded(route: Route) {
+        if (routes.contains(route)) {
+            finishRoute(route)
         }
     }
 

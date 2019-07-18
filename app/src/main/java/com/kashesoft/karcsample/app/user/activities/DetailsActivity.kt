@@ -5,8 +5,10 @@
 package com.kashesoft.karcsample.app.user.activities
 
 import android.widget.Toast
+import androidx.annotation.IdRes
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.kashesoft.karc.app.Activity
+import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.app.get
 import com.kashesoft.karc.app.getOrNull
 import com.kashesoft.karc.utils.Layout
@@ -26,8 +28,11 @@ class DetailsActivity : Activity<DetailsPresenter>(DetailsPresenter::class) {
 
     override val loggingLifecycle = true
 
+    private var blockingNavigationListenet = false
+
     override fun viewDidLoad() {
         navigation.setOnNavigationItemSelectedListener(BottomNavigationView.OnNavigationItemSelectedListener { item ->
+            if (blockingNavigationListenet) return@OnNavigationItemSelectedListener false
             when (item.itemId) {
                 R.id.navigation_abc -> {
                     AppRouter::class.get.showFragmentInContainer(FirstFragment::class, R.id.container).route()
@@ -53,6 +58,19 @@ class DetailsActivity : Activity<DetailsPresenter>(DetailsPresenter::class) {
             Toast.makeText(this, "Detected $it", Toast.LENGTH_SHORT).show()
         }
 
+    }
+
+    override fun willShowFragmentInContainer(fragment: Fragment<*>, @IdRes containerViewId: Int) {
+        blockingNavigationListenet = true
+        when (fragment) {
+            is FirstFragment -> {
+                navigation.menu.findItem(R.id.navigation_abc).isChecked = true
+            }
+            is SecondFragment -> {
+                navigation.menu.findItem(R.id.navigation_xyz).isChecked = true
+            }
+        }
+        blockingNavigationListenet = false
     }
 
 }
