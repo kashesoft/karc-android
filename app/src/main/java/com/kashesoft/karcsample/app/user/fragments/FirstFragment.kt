@@ -8,8 +8,6 @@ import android.app.ProgressDialog
 import android.os.Bundle
 import com.kashesoft.karc.app.Fragment
 import com.kashesoft.karc.utils.Layout
-import com.kashesoft.karc.utils.profileObjectDidCreate
-import com.kashesoft.karc.utils.profileObjectWillDestroy
 import com.kashesoft.karcsample.R
 import com.kashesoft.karcsample.app.domain.presenters.FirstPresenter
 import com.kashesoft.karcsample.app.domain.presenters.base.UserPresenter
@@ -27,14 +25,8 @@ class FirstFragment : Fragment<FirstPresenter>(FirstPresenter::class), UserPrese
     private lateinit var progressDialog: ProgressDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        profileObjectDidCreate()
         super.onCreate(savedInstanceState)
         //cached = this
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        profileObjectWillDestroy()
     }
 
     override fun viewDidLoad() {

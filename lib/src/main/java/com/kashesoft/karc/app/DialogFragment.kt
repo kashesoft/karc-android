@@ -18,6 +18,8 @@ import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
+import com.kashesoft.karc.utils.profileObjectDidCreate
+import com.kashesoft.karc.utils.profileObjectWillDestroy
 import kotlin.reflect.KClass
 
 abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<P>? = null) : DialogFragment(),
@@ -38,6 +40,12 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
 
     var layoutIsCompleted = false
         private set
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        log("onCreate")
+        if (Application.instance.autoObjectProfiling) profileObjectDidCreate()
+        super.onCreate(savedInstanceState)
+    }
 
     protected open fun viewDidLoad() {}
 
@@ -94,6 +102,12 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
         log("onDestroyView")
         super.onDestroyView()
         detachCompanionPresenter()
+    }
+
+    override fun onDestroy() {
+        log("onDestroy")
+        super.onDestroy()
+        if (Application.instance.autoObjectProfiling) profileObjectWillDestroy()
     }
 
     private fun prepareView(inflater: LayoutInflater, container: ViewGroup?): View {

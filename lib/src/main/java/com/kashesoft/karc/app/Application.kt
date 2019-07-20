@@ -221,6 +221,8 @@ abstract class Application<out R : Router> : Application(), Logging,
 
     //region <==========|Profiling|==========>
 
+    internal var autoObjectProfiling = false
+
     init {
         MethodProfiler.eventListener = { event ->
             onMethodProfilerEvent(event)
@@ -256,7 +258,8 @@ abstract class Application<out R : Router> : Application(), Logging,
         ObjectProfiler.sampleStepTime = sampleStepMillis
     }
 
-    protected fun activateObjectProfiler() {
+    protected fun activateObjectProfiler(autoProfiling: Boolean = false) {
+        autoObjectProfiling = autoProfiling
         ObjectProfiler.activate()
     }
 

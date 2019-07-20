@@ -4,8 +4,11 @@
 
 package com.kashesoft.karc.core
 
+import com.kashesoft.karc.app.Application
 import com.kashesoft.karc.utils.CustomHandler
 import com.kashesoft.karc.utils.Logging
+import com.kashesoft.karc.utils.profileObjectDidCreate
+import com.kashesoft.karc.utils.profileObjectWillDestroy
 import java.lang.ref.WeakReference
 import java.util.concurrent.CountDownLatch
 
@@ -193,6 +196,7 @@ private fun Component.transaction(transaction: Transaction, toState: State) {
 }
 
 private fun Component.doSetUp(params: Map<String, Any>) {
+    if (Application.instance.autoObjectProfiling) profileObjectDidCreate()
     willSetUp(params)
     log("onSetUp: params = $params")
     onSetUp(params)
@@ -232,6 +236,7 @@ private fun Component.doTearDown() {
     log("onTearDown")
     onTearDown()
     didTearDown()
+    if (Application.instance.autoObjectProfiling) profileObjectWillDestroy()
 }
 
 internal fun Component.log(message: String) {

@@ -21,6 +21,8 @@ import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.core.router.Route
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
+import com.kashesoft.karc.utils.profileObjectDidCreate
+import com.kashesoft.karc.utils.profileObjectWillDestroy
 import kotlin.reflect.KClass
 import kotlin.reflect.full.createInstance
 
@@ -56,6 +58,7 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
     @CallSuper
     override fun onCreate(savedInstanceState: Bundle?) {
         log("onCreate isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
+        if (Application.instance.autoObjectProfiling) profileObjectDidCreate()
         super.onCreate(savedInstanceState)
         prepareView()
         onLoad()
@@ -98,6 +101,7 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
         log("onDestroy isChangingConfigurations()=$isChangingConfigurations, isFinishing=$isFinishing")
         super.onDestroy()
         detachCompanionPresenter()
+        if (Application.instance.autoObjectProfiling) profileObjectWillDestroy()
     }
 
     protected open fun willShowFragmentInContainer(fragment: KarcFragment, @IdRes containerViewId: Int) {}
