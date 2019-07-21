@@ -141,9 +141,9 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
 
     private fun attachCompanionPresenter() {
         val presenterClass = presenterClass ?: return
-        if (viewModel.hasNoPresenter(presenterClass)) {
-            val params = Application.instance.router.paramsForComponent(this::class)
-            viewModel.setPresenter(presenterClass, params)
+        if (viewModel.hasNoPresenter()) {
+            val params = Application.instance.router.paramsForComponent(this::class, "default")
+            viewModel.setPresenter(presenterClass, "default", params)
         }
         val presenter = viewModel.getPresenter()!!
         presenter.attachPresentable(this)
@@ -173,10 +173,12 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
             Route.Path.FRAGMENT_SHOW_IN_CONTAINER -> {
                 @Suppress("UNCHECKED_CAST")
                 val fragmentClass: KClass<KarcFragment> = query.params[Route.Param.COMPONENT_CLASS] as KClass<KarcFragment>
+                val componentTag: String = query.params[Route.Param.COMPONENT_TAG] as String
                 val fragmentContainer: Int = query.params[Route.Param.FRAGMENT_CONTAINER] as Int
                 if (hasViewWithId(fragmentContainer)) {
                     showFragmentInContainer(
                             fragmentClass,
+                            componentTag,
                             fragmentContainer,
                             android.R.animator.fade_in,
                             android.R.animator.fade_out
@@ -189,13 +191,15 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
             Route.Path.FRAGMENT_SHOW_AS_DIALOG -> {
                 @Suppress("UNCHECKED_CAST")
                 val fragmentClass: KClass<KarcDialogFragment> = query.params[Route.Param.COMPONENT_CLASS] as KClass<KarcDialogFragment>
-                showFragmentAsDialog(fragmentClass)
+                val componentTag: String = query.params[Route.Param.COMPONENT_TAG] as String
+                showFragmentAsDialog(fragmentClass, componentTag)
                 true
             }
             Route.Path.FRAGMENT_HIDE_AS_DIALOG -> {
                 @Suppress("UNCHECKED_CAST")
                 val fragmentClass: KClass<KarcDialogFragment> = query.params[Route.Param.COMPONENT_CLASS] as KClass<KarcDialogFragment>
-                hideFragmentAsDialog(fragmentClass)
+                val componentTag: String = query.params[Route.Param.COMPONENT_TAG] as String
+                hideFragmentAsDialog(fragmentClass, componentTag)
                 true
             }
             else -> false
@@ -204,15 +208,19 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
 
     private fun <T : KarcFragment> showFragmentInContainer(
             fragmentClass: KClass<T>,
+            componentTag: String,
             @IdRes containerViewId: Int,
             @AnimatorRes @AnimRes enterAnimation: Int,
             @AnimatorRes @AnimRes exitAnimation: Int
     ) {
-        val fragmentTag = fragmentClass.simpleName!!
+        val fragmentTag = "${fragmentClass.simpleName}|$componentTag"
         val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag)
         if (currentFragmentWithTag != null) return
 
         val fragment = fragmentClass.createInstance()
+        val args = Bundle()
+        args.putString(Route.Param.COMPONENT_TAG, componentTag)
+        fragment.arguments = args
 
         val fragmentTransaction = supportFragmentManager.beginTransaction()
 
@@ -229,18 +237,21 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
                 .commitNowAllowingStateLoss()
     }
 
-    private fun <T : KarcDialogFragment> showFragmentAsDialog(fragmentClass: KClass<T>) {
-        val fragmentTag = fragmentClass.simpleName!!
+    private fun <T : KarcDialogFragment> showFragmentAsDialog(fragmentClass: KClass<T>, componentTag: String) {
+        val fragmentTag = "${fragmentClass.simpleName}|$componentTag"
         val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag)
         if (currentFragmentWithTag != null) return
 
         val fragment = fragmentClass.createInstance()
+        val args = Bundle()
+        args.putString(Route.Param.COMPONENT_TAG, componentTag)
+        fragment.arguments = args
 
         fragment.show(supportFragmentManager, fragmentTag)
     }
 
-    private fun <T : KarcDialogFragment> hideFragmentAsDialog(fragmentClass: KClass<T>) {
-        val fragmentTag = fragmentClass.simpleName!!
+    private fun <T : KarcDialogFragment> hideFragmentAsDialog(fragmentClass: KClass<T>, componentTag: String) {
+        val fragmentTag = "${fragmentClass.simpleName}|$componentTag"
         val currentFragmentWithTag = supportFragmentManager.findFragmentByTag(fragmentTag) as? KarcDialogFragment ?: return
 
         currentFragmentWithTag.dismissAllowingStateLoss()

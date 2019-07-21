@@ -15,20 +15,26 @@ import kotlin.reflect.KClass
 internal class ViewModel<P : Presenter> : ViewModel() {
 
     private var presenterClass: KClass<P>? = null
+    private var presenterTag: String? = null
 
     private var isChangingConfigurations = false
 
-    internal fun hasNoPresenter(presenterClass: KClass<P>): Boolean {
-        return Core.component(presenterClass) == null
+    internal fun hasNoPresenter(): Boolean {
+        val presenterClass = presenterClass ?: return true
+        val presenterTag = presenterTag ?: return true
+        return Core.component(presenterClass, presenterTag) == null
     }
 
     internal fun getPresenter(): P? {
-        return presenterClass?.let { Core.component(it) } as? P
+        val presenterClass = presenterClass ?: return null
+        val presenterTag = presenterTag ?: return null
+        return Core.component(presenterClass, presenterTag) as? P
     }
 
-    internal fun setPresenter(presenterClass: KClass<P>, params: Map<String, Any>) {
+    internal fun setPresenter(presenterClass: KClass<P>, presenterTag: String, params: Map<String, Any>) {
         this.presenterClass = presenterClass
-        Core.setUpComponent(presenterClass, params, Mode.UI_SYNC, false)
+        this.presenterTag = presenterTag
+        Core.setUpComponent(presenterClass, presenterTag, params, Mode.UI_SYNC, false)
     }
 
     internal fun onStart() {
@@ -59,10 +65,13 @@ internal class ViewModel<P : Presenter> : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        presenterClass?.let {
-            Core.tearDownComponent(it)
-            presenterClass = null
+        val presenterClass = presenterClass
+        val presenterTag = presenterTag
+        if (presenterClass != null && presenterTag != null) {
+            Core.tearDownComponent(presenterClass, presenterTag)
         }
+        this.presenterClass = null
+        this.presenterTag = null
     }
 
 }

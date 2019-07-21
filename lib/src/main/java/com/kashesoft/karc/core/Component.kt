@@ -22,6 +22,7 @@ enum class Mode {
 
 class Spec(
         val component: WeakReference<Component>,
+        val tag: String,
         var state: State,
         val params: Map<String, Any>,
         val appLifecycle: Boolean,

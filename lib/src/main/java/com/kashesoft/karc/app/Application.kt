@@ -38,14 +38,26 @@ inline val <reified R : Router> KClass<R>.get: R
 inline val <reified G : Gateway> KClass<G>.get: G
     get() = Core.component(this)!! as G
 
+inline fun <reified G : Gateway> KClass<G>.get(componentTag: String): G
+    = Core.component(this, componentTag)!! as G
+
 inline val <reified G : Gateway> KClass<G>.getOrNull: G?
     get() = Core.component(this) as? G
+
+inline fun <reified G : Gateway> KClass<G>.getOrNull(componentTag: String): G?
+    = Core.component(this, componentTag) as? G
 
 inline val <reified P : Presenter> KClass<P>.get: P
     get() = Core.component(this)!! as P
 
+inline fun <reified P : Presenter> KClass<P>.get(componentTag: String): P
+    = Core.component(this, componentTag)!! as P
+
 inline val <reified P : Presenter> KClass<P>.getOrNull: P?
     get() = Core.component(this) as? P
+
+inline fun <reified P : Presenter> KClass<P>.getOrNull(componentTag: String): P?
+    = Core.component(this, componentTag) as? P
 
 inline fun <reified C : Component, I : C> KClass<C>.setProvider(componentProvider: Provider<I>) {
     Core.setComponentProvider(componentProvider as Provider<Component>, this)
@@ -151,54 +163,58 @@ abstract class Application<out R : Router> : Application(), Logging,
     override fun route(query: Query): Boolean {
         return when (query.path) {
             Route.Path.PRESENTER_SET_UP -> {
-                val presenterClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                log("Set up ${presenterClass.simpleName}")
-                Core.setUpComponent(presenterClass, query.params, Mode.IO_ASYNC, true)
+                val componentClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
+                val componentTag: String = (query.params[Route.Param.COMPONENT_TAG] as String)
+                log("Set up ${componentClass.simpleName}")
+                Core.setUpComponent(componentClass, componentTag, query.params, Mode.IO_ASYNC, true)
                 true
             }
             Route.Path.PRESENTER_TEAR_DOWN -> {
-                val presenterClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                log("Tear down ${presenterClass.simpleName}")
-                Core.tearDownComponent(presenterClass)
+                val componentClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
+                val componentTag: String = (query.params[Route.Param.COMPONENT_TAG] as String)
+                log("Tear down ${componentClass.simpleName}")
+                Core.tearDownComponent(componentClass, componentTag)
                 true
             }
             Route.Path.GATEWAY_SET_UP -> {
-                val gatewayClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                log("Set up ${gatewayClass.simpleName}")
-                Core.setUpComponent(gatewayClass, query.params, Mode.IO_ASYNC, true)
+                val componentClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
+                val componentTag: String = (query.params[Route.Param.COMPONENT_TAG] as String)
+                log("Set up ${componentClass.simpleName}")
+                Core.setUpComponent(componentClass, componentTag, query.params, Mode.IO_ASYNC, true)
                 true
             }
             Route.Path.GATEWAY_TEAR_DOWN -> {
-                val gatewayClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
-                log("Tear down ${gatewayClass.simpleName}")
-                Core.tearDownComponent(gatewayClass)
+                val componentClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
+                val componentTag: String = (query.params[Route.Param.COMPONENT_TAG] as String)
+                log("Tear down ${componentClass.simpleName}")
+                Core.tearDownComponent(componentClass, componentTag)
                 true
             }
             Route.Path.ACTIVITY_START -> {
                 val currentActivity = resumedActivity ?: return false
-                val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
-                if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
-                val intent = Intent(currentActivity, activityClass)
-                log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
+                val componentClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
+                if (currentActivity::class.javaObjectType.isAssignableFrom(componentClass)) return true
+                val intent = Intent(currentActivity, componentClass)
+                log("Start ${componentClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
                 currentActivity.startActivity(intent)
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
             }
             Route.Path.ACTIVITY_START_NEW_CLEAR -> {
                 val currentActivity = resumedActivity ?: return false
-                val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
-                if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
-                val intent = Intent(currentActivity, activityClass)
+                val componentClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
+                if (currentActivity::class.javaObjectType.isAssignableFrom(componentClass)) return true
+                val intent = Intent(currentActivity, componentClass)
                 intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                log("Start ${activityClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
+                log("Start ${componentClass.kotlin.simpleName} from ${currentActivity::class.simpleName}")
                 currentActivity.startActivity(intent)
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true
             }
             Route.Path.ACTIVITY_FINISH -> {
                 val currentActivity = resumedActivity ?: return false
-                val activityClass: Class<*>? = (query.params[Route.Param.COMPONENT_CLASS] as? KClass<*>)?.java
-                if (activityClass != null && !currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
+                val componentClass: Class<*>? = (query.params[Route.Param.COMPONENT_CLASS] as? KClass<*>)?.java
+                if (componentClass != null && !currentActivity::class.javaObjectType.isAssignableFrom(componentClass)) return true
                 log("Finish ${currentActivity::class.simpleName}")
                 currentActivity.finish()
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
@@ -206,9 +222,9 @@ abstract class Application<out R : Router> : Application(), Logging,
             }
             Route.Path.ACTIVITY_FINISH_EXCEPT -> {
                 val currentActivity = resumedActivity ?: return false
-                val activityClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
-                if (currentActivity::class.javaObjectType.isAssignableFrom(activityClass)) return true
-                log("Finish ${currentActivity::class.simpleName} except ${activityClass.kotlin.simpleName}")
+                val componentClass: Class<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>).java
+                if (currentActivity::class.javaObjectType.isAssignableFrom(componentClass)) return true
+                log("Finish ${currentActivity::class.simpleName} except ${componentClass.kotlin.simpleName}")
                 currentActivity.finish()
                 (currentActivity as? KarcActivity)?.detachCompanionRouter()
                 true

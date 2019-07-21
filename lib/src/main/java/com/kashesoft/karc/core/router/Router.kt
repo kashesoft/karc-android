@@ -49,48 +49,48 @@ abstract class Router : Logging {
         return Route(this).path(path, params)
     }
 
-    fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).setUpPresenter(presenterClass, params)
+    fun setUpPresenter(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+        return Route(this).setUpPresenter(componentClass, componentTag, params)
     }
 
-    fun tearDownPresenter(presenterClass: KClass<*>): Route {
-        return Route(this).tearDownPresenter(presenterClass)
+    fun tearDownPresenter(componentClass: KClass<*>, componentTag: String = "default"): Route {
+        return Route(this).tearDownPresenter(componentClass, componentTag)
     }
 
-    fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).setUpGateway(gatewayClass, params)
+    fun setUpGateway(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+        return Route(this).setUpGateway(componentClass, componentTag, params)
     }
 
-    fun tearDownGateway(gatewayClass: KClass<*>): Route {
-        return Route(this).tearDownGateway(gatewayClass)
+    fun tearDownGateway(componentClass: KClass<*>, componentTag: String = "default"): Route {
+        return Route(this).tearDownGateway(componentClass, componentTag)
     }
 
-    fun startActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).startActivity(activityClass, params)
+    fun startActivity(componentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).startActivity(componentClass, params)
     }
 
-    fun startActivityNewClear(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).startActivityNewClear(activityClass, params)
+    fun startActivityNewClear(componentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).startActivityNewClear(componentClass, params)
     }
 
-    fun finishActivity(activityClass: KClass<*>? = null): Route {
-        return Route(this).finishActivity(activityClass)
+    fun finishActivity(componentClass: KClass<*>? = null): Route {
+        return Route(this).finishActivity(componentClass)
     }
 
-    fun finishActivityExcept(activityClass: KClass<*>): Route {
-        return Route(this).finishActivityExcept(activityClass)
+    fun finishActivityExcept(componentClass: KClass<*>): Route {
+        return Route(this).finishActivityExcept(componentClass)
     }
 
-    fun showFragmentInContainer(fragmentClass: KClass<*>, fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).showFragmentInContainer(fragmentClass, fragmentContainer, params)
+    fun showFragmentInContainer(componentClass: KClass<*>, componentTag: String = "default", fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).showFragmentInContainer(componentClass, componentTag, fragmentContainer, params)
     }
 
-    fun showFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).showFragmentAsDialog(fragmentClass, params)
+    fun showFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+        return Route(this).showFragmentAsDialog(componentClass, componentTag, params)
     }
 
-    fun hideFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
-        return Route(this).hideFragmentAsDialog(fragmentClass, params)
+    fun hideFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+        return Route(this).hideFragmentAsDialog(componentClass, componentTag, params)
     }
 
     @Synchronized
@@ -119,10 +119,11 @@ abstract class Router : Logging {
     }
 
     @Synchronized
-    internal fun paramsForComponent(componentClass: KClass<*>): Map<String, Any> {
-        val query: Query = routes.mapNotNull { it.currentQuery() }.lastOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass } ?: return mapOf()
+    internal fun paramsForComponent(componentClass: KClass<*>, componentTag: String): Map<String, Any> {
+        val query: Query = routes.mapNotNull { it.currentQuery() }.lastOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass && it.params[Route.Param.COMPONENT_TAG] == componentTag } ?: return mapOf()
         val params = query.params.toMutableMap()
         params.remove(Route.Param.COMPONENT_CLASS)
+        params.remove(Route.Param.COMPONENT_TAG)
         params.remove(Route.Param.FRAGMENT_CONTAINER)
         return params.toMap()
     }

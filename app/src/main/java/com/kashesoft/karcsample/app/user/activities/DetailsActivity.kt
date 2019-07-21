@@ -35,11 +35,11 @@ class DetailsActivity : Activity<DetailsPresenter>(DetailsPresenter::class) {
             if (blockingNavigationListenet) return@OnNavigationItemSelectedListener false
             when (item.itemId) {
                 R.id.navigation_abc -> {
-                    AppRouter::class.get.showFragmentInContainer(FirstFragment::class, R.id.container).route()
+                    AppRouter::class.get.showFragmentInContainer(FirstFragment::class, fragmentContainer = R.id.container).route()
                     return@OnNavigationItemSelectedListener true
                 }
                 R.id.navigation_xyz -> {
-                    AppRouter::class.get.showFragmentInContainer(SecondFragment::class, R.id.container).route()
+                    AppRouter::class.get.showFragmentInContainer(SecondFragment::class, fragmentContainer = R.id.container).route()
                     return@OnNavigationItemSelectedListener true
                 }
             }

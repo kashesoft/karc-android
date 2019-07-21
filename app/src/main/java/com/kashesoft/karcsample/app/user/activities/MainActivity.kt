@@ -29,7 +29,7 @@ class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresente
     override fun viewDidLoad() {
         //
         setUpAbcGatewayButton.setOnClickListener {
-            AppRouter::class.get.setUpGateway(AbcGateway::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpGateway(AbcGateway::class, params = mapOf("string" to "test string")).route()
         }
         //
         tearDownAbcGatewayButton.setOnClickListener {
@@ -37,7 +37,7 @@ class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresente
         }
         //
         setUpXyzGatewayButton.setOnClickListener {
-            AppRouter::class.get.setUpGateway(XyzGateway::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpGateway(XyzGateway::class, params = mapOf("string" to "test string")).route()
         }
         //
         tearDownXyzGatewayButton.setOnClickListener {
@@ -45,7 +45,7 @@ class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresente
         }
         //
         setUpAbcPresenterButton.setOnClickListener {
-            AppRouter::class.get.setUpPresenter(AbcPresenter::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpPresenter(AbcPresenter::class, params = mapOf("string" to "test string")).route()
         }
         //
         tearDownAbcPresenterButton.setOnClickListener {
@@ -53,7 +53,7 @@ class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresente
         }
         //
         setUpXyzPresenterButton.setOnClickListener {
-            AppRouter::class.get.setUpPresenter(XyzPresenter::class, mapOf("string" to "test string")).route()
+            AppRouter::class.get.setUpPresenter(XyzPresenter::class, params = mapOf("string" to "test string")).route()
         }
         //
         tearDownXyzPresenterButton.setOnClickListener {
@@ -64,7 +64,7 @@ class MainActivity : Activity<MainPresenter>(MainPresenter::class), UserPresente
             AppRouter::class.get.startActivity(
                     DetailsActivity::class,
                     mapOf("string" to "test string", "number" to 123)
-            ).showFragmentInContainer(SecondFragment::class, R.id.container).route()
+            ).showFragmentInContainer(SecondFragment::class, fragmentContainer = R.id.container).route()
         }
         //
         button.setOnClickListener {

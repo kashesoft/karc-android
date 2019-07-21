@@ -24,6 +24,7 @@ class Route(private val router: Router) {
 
     object Param {
         const val COMPONENT_CLASS = "componentClass"
+        const val COMPONENT_TAG = "componentTag"
         const val FRAGMENT_CONTAINER = "fragmentContainer"
     }
 
@@ -44,83 +45,84 @@ class Route(private val router: Router) {
         return this
     }
 
-    fun setUpPresenter(presenterClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun setUpPresenter(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.PRESENTER_SET_UP,
-                params + mapOf(Param.COMPONENT_CLASS to presenterClass)
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
         )
         queries.add(query)
         return this
     }
 
-    fun tearDownPresenter(presenterClass: KClass<*>): Route {
+    fun tearDownPresenter(componentClass: KClass<*>, componentTag: String = "default"): Route {
         val query = Query(
                 Path.PRESENTER_TEAR_DOWN,
-                mapOf(Param.COMPONENT_CLASS to presenterClass)
+                mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
         )
         queries.add(query)
         return this
     }
 
-    fun setUpGateway(gatewayClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun setUpGateway(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.GATEWAY_SET_UP,
-                params + mapOf(Param.COMPONENT_CLASS to gatewayClass)
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
         )
         queries.add(query)
         return this
     }
 
-    fun tearDownGateway(gatewayClass: KClass<*>): Route {
+    fun tearDownGateway(componentClass: KClass<*>, componentTag: String = "default"): Route {
         val query = Query(
                 Path.GATEWAY_TEAR_DOWN,
-                mapOf(Param.COMPONENT_CLASS to gatewayClass)
+                mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
         )
         queries.add(query)
         return this
     }
 
-    fun startActivity(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun startActivity(componentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.ACTIVITY_START,
-                params + mapOf(Param.COMPONENT_CLASS to activityClass)
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default")
         )
         queries.add(query)
         return this
     }
 
-    fun startActivityNewClear(activityClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun startActivityNewClear(componentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.ACTIVITY_START_NEW_CLEAR,
-                params + mapOf(Param.COMPONENT_CLASS to activityClass)
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default")
         )
         queries.add(query)
         return this
     }
 
-    fun finishActivity(activityClass: KClass<*>? = null): Route {
+    fun finishActivity(componentClass: KClass<*>? = null): Route {
         val query = Query(
                 Path.ACTIVITY_FINISH,
-                if (activityClass != null) mapOf(Param.COMPONENT_CLASS to activityClass) else mapOf()
+                if (componentClass != null) mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default") else mapOf()
         )
         queries.add(query)
         return this
     }
 
-    fun finishActivityExcept(activityClass: KClass<*>): Route {
+    fun finishActivityExcept(componentClass: KClass<*>): Route {
         val query = Query(
                 Path.ACTIVITY_FINISH_EXCEPT,
-                mapOf(Param.COMPONENT_CLASS to activityClass)
+                mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default")
         )
         queries.add(query)
         return this
     }
 
-    fun showFragmentInContainer(fragmentClass: KClass<*>, fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
+    fun showFragmentInContainer(componentClass: KClass<*>, componentTag: String = "default", fragmentContainer: Int, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.FRAGMENT_SHOW_IN_CONTAINER,
                 params + mapOf(
-                        Param.COMPONENT_CLASS to fragmentClass,
+                        Param.COMPONENT_CLASS to componentClass,
+                        Param.COMPONENT_TAG to componentTag,
                         Param.FRAGMENT_CONTAINER to fragmentContainer
                 )
         )
@@ -128,22 +130,24 @@ class Route(private val router: Router) {
         return this
     }
 
-    fun showFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun showFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.FRAGMENT_SHOW_AS_DIALOG,
                 params + mapOf(
-                        Param.COMPONENT_CLASS to fragmentClass
+                        Param.COMPONENT_CLASS to componentClass,
+                        Param.COMPONENT_TAG to componentTag
                 )
         )
         queries.add(query)
         return this
     }
 
-    fun hideFragmentAsDialog(fragmentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
+    fun hideFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.FRAGMENT_HIDE_AS_DIALOG,
                 params + mapOf(
-                        Param.COMPONENT_CLASS to fragmentClass
+                        Param.COMPONENT_CLASS to componentClass,
+                        Param.COMPONENT_TAG to componentTag
                 )
         )
         queries.add(query)

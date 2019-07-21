@@ -16,6 +16,7 @@ import com.kashesoft.karc.core.presenter.Presentable
 import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
+import com.kashesoft.karc.core.router.Route
 import com.kashesoft.karc.utils.Layout
 import com.kashesoft.karc.utils.Logging
 import com.kashesoft.karc.utils.profileObjectDidCreate
@@ -145,9 +146,10 @@ abstract class Fragment<P : Presenter>(private val presenterClass: KClass<P>? = 
 
     private fun attachCompanionPresenter() {
         val presenterClass = presenterClass ?: return
-        if (viewModel.hasNoPresenter(presenterClass)) {
-            val params = Application.instance.router.paramsForComponent(this::class)
-            viewModel.setPresenter(presenterClass, params)
+        if (viewModel.hasNoPresenter()) {
+            val componentTag = arguments!!.getString(Route.Param.COMPONENT_TAG)!!
+            val params = Application.instance.router.paramsForComponent(this::class, componentTag)
+            viewModel.setPresenter(presenterClass, componentTag, params)
         }
         val presenter = viewModel.getPresenter()!!
         presenter.attachPresentable(this)
