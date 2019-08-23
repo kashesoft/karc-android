@@ -13,9 +13,10 @@ object Core {
 
     private var state: State = State.DOWN
 
+    @Synchronized
     fun setState(state: State) {
         this.state = state
-        components.forEach { (component, spec) ->
+        components.toList().forEach { (component, spec) ->
             if (spec.appLifecycle) {
                 component.setState(state)
             }
