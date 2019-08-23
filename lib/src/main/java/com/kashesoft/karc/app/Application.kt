@@ -165,8 +165,9 @@ abstract class Application<out R : Router> : Application(), Logging,
             Route.Path.PRESENTER_SET_UP -> {
                 val componentClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
                 val componentTag: String = (query.params[Route.Param.COMPONENT_TAG] as String)
+                val componentMode: Mode = (query.params[Route.Param.COMPONENT_MODE] as Mode)
                 log("Set up ${componentClass.simpleName}")
-                Core.setUpComponent(componentClass, componentTag, query.params, Mode.IO_ASYNC, true)
+                Core.setUpComponent(componentClass, componentTag, query.params, componentMode, true)
                 true
             }
             Route.Path.PRESENTER_TEAR_DOWN -> {
@@ -179,8 +180,9 @@ abstract class Application<out R : Router> : Application(), Logging,
             Route.Path.GATEWAY_SET_UP -> {
                 val componentClass: KClass<*> = (query.params[Route.Param.COMPONENT_CLASS] as KClass<*>)
                 val componentTag: String = (query.params[Route.Param.COMPONENT_TAG] as String)
+                val componentMode: Mode = (query.params[Route.Param.COMPONENT_MODE] as Mode)
                 log("Set up ${componentClass.simpleName}")
-                Core.setUpComponent(componentClass, componentTag, query.params, Mode.IO_ASYNC, true)
+                Core.setUpComponent(componentClass, componentTag, query.params, componentMode, true)
                 true
             }
             Route.Path.GATEWAY_TEAR_DOWN -> {

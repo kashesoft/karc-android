@@ -6,6 +6,7 @@ package com.kashesoft.karc.core.router
 
 import android.os.Handler
 import android.os.Looper
+import com.kashesoft.karc.core.Mode
 import com.kashesoft.karc.utils.Logging
 import java.util.*
 import kotlin.reflect.KClass
@@ -49,16 +50,16 @@ abstract class Router : Logging {
         return Route(this).path(path, params)
     }
 
-    fun setUpPresenter(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
-        return Route(this).setUpPresenter(componentClass, componentTag, params)
+    fun setUpPresenter(componentClass: KClass<*>, componentTag: String = "default", componentMode: Mode = Mode.UI_SYNC, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).setUpPresenter(componentClass, componentTag, componentMode, params)
     }
 
     fun tearDownPresenter(componentClass: KClass<*>, componentTag: String = "default"): Route {
         return Route(this).tearDownPresenter(componentClass, componentTag)
     }
 
-    fun setUpGateway(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
-        return Route(this).setUpGateway(componentClass, componentTag, params)
+    fun setUpGateway(componentClass: KClass<*>, componentTag: String = "default", componentMode: Mode = Mode.UI_SYNC, params: Map<String, Any> = mapOf()): Route {
+        return Route(this).setUpGateway(componentClass, componentTag, componentMode, params)
     }
 
     fun tearDownGateway(componentClass: KClass<*>, componentTag: String = "default"): Route {

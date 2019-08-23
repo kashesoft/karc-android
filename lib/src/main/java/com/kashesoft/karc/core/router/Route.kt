@@ -4,6 +4,7 @@
 
 package com.kashesoft.karc.core.router
 
+import com.kashesoft.karc.core.Mode
 import kotlin.reflect.KClass
 
 class Route(private val router: Router) {
@@ -25,6 +26,7 @@ class Route(private val router: Router) {
     object Param {
         const val COMPONENT_CLASS = "componentClass"
         const val COMPONENT_TAG = "componentTag"
+        const val COMPONENT_MODE = "componentMode"
         const val FRAGMENT_CONTAINER = "fragmentContainer"
     }
 
@@ -45,10 +47,10 @@ class Route(private val router: Router) {
         return this
     }
 
-    fun setUpPresenter(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+    fun setUpPresenter(componentClass: KClass<*>, componentTag: String = "default", componentMode: Mode = Mode.UI_SYNC, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.PRESENTER_SET_UP,
-                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag, Param.COMPONENT_MODE to componentMode)
         )
         queries.add(query)
         return this
@@ -63,10 +65,10 @@ class Route(private val router: Router) {
         return this
     }
 
-    fun setUpGateway(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+    fun setUpGateway(componentClass: KClass<*>, componentTag: String = "default", componentMode: Mode = Mode.UI_SYNC, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.GATEWAY_SET_UP,
-                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag, Param.COMPONENT_MODE to componentMode)
         )
         queries.add(query)
         return this
