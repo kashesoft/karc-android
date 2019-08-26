@@ -101,28 +101,28 @@ abstract class Application<out R : Router> : Application(), Logging,
 
     @OnLifecycleEvent(Lifecycle.Event.ON_START)
     @Synchronized
-    protected fun onStart() {
+    protected open fun onStart() {
         log("onStart")
         Core.setState(State.INACTIVE)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_RESUME)
     @Synchronized
-    protected fun onResume() {
+    protected open fun onResume() {
         log("onResume")
         Core.setState(State.ACTIVE)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_PAUSE)
     @Synchronized
-    protected fun onPause() {
+    protected open fun onPause() {
         log("onPause")
         Core.setState(State.INACTIVE)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
     @Synchronized
-    protected fun onStop() {
+    protected open fun onStop() {
         log("onStop")
         Core.setState(State.BACKGROUND)
     }
