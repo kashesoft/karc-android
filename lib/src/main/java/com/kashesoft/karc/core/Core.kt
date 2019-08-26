@@ -13,10 +13,9 @@ object Core {
 
     private var state: State = State.DOWN
 
-    @Synchronized
     fun setState(state: State) {
         this.state = state
-        components.toList().forEach { (component, spec) ->
+        copiedComponents().forEach { (component, spec) ->
             if (spec.appLifecycle) {
                 component.setState(state)
             }
@@ -25,6 +24,11 @@ object Core {
 
     internal val componentProviders: MutableMap<KClass<*>, Provider<Component>> = mutableMapOf()
     private val components: MutableMap<Component, Spec> = mutableMapOf()
+
+    @Synchronized
+    private fun copiedComponents(): List<Pair<Component, Spec>> {
+        return components.toList()
+    }
 
     @Synchronized
     internal fun registerComponent(component: Component, componentTag: String, params: Map<String, Any>, mode: Mode, appLifecycle: Boolean) {
@@ -38,17 +42,16 @@ object Core {
     }
 
     @Synchronized
-    internal fun specForComponent(component: Component): Spec {
-        return components[component]!!
+    internal fun specForComponent(component: Component): Spec? {
+        return components[component]
     }
 
     fun setComponentProvider(componentProvider: Provider<Component>, componentClass: KClass<*>) {
         this.componentProviders[componentClass] = componentProvider
     }
 
-    @Synchronized
     fun component(componentClass: KClass<*>, componentTag: String = "default"): Component? {
-        return components.toList().firstOrNull { (component, spec) ->
+        return copiedComponents().firstOrNull { (component, spec) ->
             componentClass.java.isAssignableFrom(component::class.java) && spec.tag == componentTag
         }?.first
     }

@@ -138,28 +138,42 @@ interface Component : Logging {
     fun didTearDown() {}
 
     var state: State
-        get() = Core.specForComponent(this).state
+        get() = Core.specForComponent(this)!!.state
         set(value) {
-            Core.specForComponent(this).state = value
+            Core.specForComponent(this)!!.state = value
         }
 
     val params: Map<String, Any>
-        get() = Core.specForComponent(this).params
+        get() = Core.specForComponent(this)!!.params
 
 }
 
 fun <R> Component.sync(block: () -> R): R {
-    return Core.specForComponent(this).awaitAllTransactionsAndDo { block() }
+    val spec = Core.specForComponent(this)
+    return if (spec != null) {
+        spec.awaitAllTransactionsAndDo { block() }
+    } else {
+        if (loggingLifecycle) {
+            logWarn("No need to sync: no spec for component $this")
+        }
+        block()
+    }
 }
 
 internal fun Component.setState(state: State) {
+    val spec = Core.specForComponent(this)
+    if (spec == null) {
+        if (loggingLifecycle) {
+            logWarn("Cannot set state = $state: no spec for component $this")
+        }
+        return
+    }
     val transaction = Transaction { component, transaction ->
         component.transaction(transaction, toState = state)
     }
-    Core.specForComponent(this).dispatchTransaction(transaction)
+    spec.dispatchTransaction(transaction)
 }
 
-@Synchronized
 private fun Component.transaction(transaction: Transaction, toState: State) {
     val fromState = state
     if (fromState < toState) {
