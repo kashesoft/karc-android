@@ -149,7 +149,7 @@ internal object ObjectProfiler {
     @Volatile
     var sampleStepTime: Long = DEFAULT_SAMPLE_STEP_TIME
 
-    private val FIBONACCI = intArrayOf(1, 2, 3, 5, 8, 13)
+    private val FIBONACCI = intArrayOf(1, 2, 3, 5, 8, 13, 21)
     @Volatile
     private var backoffCounter = 0
 
