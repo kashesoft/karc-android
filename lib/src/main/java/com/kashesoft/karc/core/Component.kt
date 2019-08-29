@@ -138,13 +138,13 @@ interface Component : Logging {
     fun didTearDown() {}
 
     var state: State
-        get() = Core.specForComponent(this)!!.state
+        get() = Core.specForComponent(this)?.state ?: State.DOWN
         set(value) {
-            Core.specForComponent(this)!!.state = value
+            Core.specForComponent(this)?.state = value
         }
 
     val params: Map<String, Any>
-        get() = Core.specForComponent(this)!!.params
+        get() = Core.specForComponent(this)?.params ?: mapOf()
 
 }
 

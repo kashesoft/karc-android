@@ -19,12 +19,6 @@ internal class ViewModel<P : Presenter> : ViewModel() {
 
     private var isChangingConfigurations = false
 
-    internal fun hasNoPresenter(): Boolean {
-        val presenterClass = presenterClass ?: return true
-        val presenterTag = presenterTag ?: return true
-        return Core.component(presenterClass, presenterTag) == null
-    }
-
     internal fun getPresenter(): P? {
         val presenterClass = presenterClass ?: return null
         val presenterTag = presenterTag ?: return null
@@ -35,6 +29,10 @@ internal class ViewModel<P : Presenter> : ViewModel() {
         this.presenterClass = presenterClass
         this.presenterTag = presenterTag
         Core.setUpComponent(presenterClass, presenterTag, params, Mode.UI_SYNC, false)
+    }
+
+    internal fun onCreate() {
+        getPresenter()?.setState(State.BACKGROUND)
     }
 
     internal fun onStart() {

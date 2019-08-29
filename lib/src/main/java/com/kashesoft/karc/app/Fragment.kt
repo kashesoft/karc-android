@@ -146,14 +146,19 @@ abstract class Fragment<P : Presenter>(private val presenterClass: KClass<P>? = 
 
     private fun attachCompanionPresenter() {
         val presenterClass = presenterClass ?: return
-        if (viewModel.hasNoPresenter()) {
+        val presenter = viewModel.getPresenter()
+        if (presenter == null) {
             val componentTag = arguments!!.getString(Route.Param.COMPONENT_TAG)!!
             val params = Application.instance.router.paramsForComponent(this::class, componentTag)
             viewModel.setPresenter(presenterClass, componentTag, params)
+            val presenter = viewModel.getPresenter()!!
+            presenter.attachPresentable(this)
+            viewModel.onCreate()
+            this.presenter = presenter
+        } else {
+            presenter.attachPresentable(this)
+            this.presenter = presenter
         }
-        val presenter = viewModel.getPresenter()!!
-        presenter.attachPresentable(this)
-        this.presenter = presenter
     }
 
     private fun detachCompanionPresenter() {
