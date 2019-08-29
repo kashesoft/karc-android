@@ -148,7 +148,7 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
         val presenterClass = presenterClass ?: return
         val presenter = viewModel.getPresenter()
         if (presenter == null) {
-            val componentTag = arguments!!.getString(Route.Param.COMPONENT_TAG)!!
+            val componentTag = arguments?.getString(Route.Param.COMPONENT_TAG) ?: "default"
             val params = Application.instance.router.paramsForComponent(this::class, componentTag)
             viewModel.setPresenter(presenterClass, componentTag, params)
             val presenter = viewModel.getPresenter()!!
