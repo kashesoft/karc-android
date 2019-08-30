@@ -149,7 +149,7 @@ abstract class Fragment<P : Presenter>(private val presenterClass: KClass<P>? = 
         val presenter = viewModel.getPresenter()
         if (presenter == null) {
             val componentTag = arguments?.getString(Route.Param.COMPONENT_TAG) ?: "default"
-            val params = Application.instance.router.paramsForComponent(this::class, componentTag)
+            val params = Application.instance.router.paramsForComponentFromCurrentNotPendingQuery(this::class, componentTag)
             viewModel.setPresenter(presenterClass, componentTag, params)
             val presenter = viewModel.getPresenter()!!
             presenter.attachPresentable(this)

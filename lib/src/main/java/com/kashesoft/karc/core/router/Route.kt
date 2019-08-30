@@ -34,7 +34,7 @@ class Route(private val router: Router) {
     private val routedQueries: MutableList<Query> = mutableListOf()
 
     override fun toString(): String {
-        return "${routedQueries.joinToString(" +++ ", transform = { "${it.path} | ${it.params}" })} >>> ${queries.joinToString(" +++ ", transform = { "${it.path} | ${it.params}" })}"
+        return "${routedQueries.joinToString(" +++ ", transform = { "${it.path} | ${it.params} | ${it.pending}" })} >>> ${queries.joinToString(" +++ ", transform = { "${it.path} | ${it.params} | ${it.pending}" })}"
     }
 
     fun route() {
@@ -86,7 +86,8 @@ class Route(private val router: Router) {
     fun startActivity(componentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.ACTIVITY_START,
-                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default")
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default"),
+                pending = true
         )
         queries.add(query)
         return this
@@ -95,7 +96,8 @@ class Route(private val router: Router) {
     fun startActivityNewClear(componentClass: KClass<*>, params: Map<String, Any> = mapOf()): Route {
         val query = Query(
                 Path.ACTIVITY_START_NEW_CLEAR,
-                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default")
+                params + mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to "default"),
+                pending = true
         )
         queries.add(query)
         return this
@@ -144,13 +146,10 @@ class Route(private val router: Router) {
         return this
     }
 
-    fun hideFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
+    fun hideFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default"): Route {
         val query = Query(
                 Path.FRAGMENT_HIDE_AS_DIALOG,
-                params + mapOf(
-                        Param.COMPONENT_CLASS to componentClass,
-                        Param.COMPONENT_TAG to componentTag
-                )
+                mapOf(Param.COMPONENT_CLASS to componentClass, Param.COMPONENT_TAG to componentTag)
         )
         queries.add(query)
         return this
@@ -166,11 +165,13 @@ class Route(private val router: Router) {
         }
     }
 
-    internal fun isNotFinished() = queries.isNotEmpty()
+    internal fun isNotFinished() = !isFinished()
 
-    internal fun isFinished() = queries.isEmpty()
+    internal fun isFinished() = queries.isEmpty() && routedQueries.none { it.pending }
 
-    internal fun currentQuery() : Query? = queries.firstOrNull()
+    internal fun currentQuery(): Query? = queries.firstOrNull()
+
+    internal fun lastRoutedQuery(): Query? = routedQueries.lastOrNull()
 
     var timeout: Long = 0
         private set
@@ -178,6 +179,10 @@ class Route(private val router: Router) {
     fun withTimeout(timeout: Long): Route {
         this.timeout = timeout
         return this
+    }
+
+    internal fun isPending(): Boolean {
+        return lastRoutedQuery()?.pending == true
     }
 
 }

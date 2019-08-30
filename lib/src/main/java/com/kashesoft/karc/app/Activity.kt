@@ -143,7 +143,7 @@ abstract class Activity<P : Presenter>(private val presenterClass: KClass<P>? = 
         val presenterClass = presenterClass ?: return
         val presenter = viewModel.getPresenter()
         if (presenter == null) {
-            val params = Application.instance.router.paramsForComponent(this::class, "default")
+            val params = Application.instance.router.paramsForComponentFromLastPendingQuery(this::class, "default")
             viewModel.setPresenter(presenterClass, "default", params)
             val presenter = viewModel.getPresenter()!!
             presenter.attachPresentable(this)

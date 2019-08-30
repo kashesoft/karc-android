@@ -90,12 +90,15 @@ abstract class Router : Logging {
         return Route(this).showFragmentAsDialog(componentClass, componentTag, params)
     }
 
-    fun hideFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default", params: Map<String, Any> = mapOf()): Route {
-        return Route(this).hideFragmentAsDialog(componentClass, componentTag, params)
+    fun hideFragmentAsDialog(componentClass: KClass<*>, componentTag: String = "default"): Route {
+        return Route(this).hideFragmentAsDialog(componentClass, componentTag)
     }
 
     @Synchronized
     internal fun route(route: Route) {
+        if (route.isPending()) {
+            return
+        }
         if (route.isFinished()) {
             finishRoute(route)
             return
@@ -120,13 +123,31 @@ abstract class Router : Logging {
     }
 
     @Synchronized
-    internal fun paramsForComponent(componentClass: KClass<*>, componentTag: String): Map<String, Any> {
-        val query: Query = routes.mapNotNull { it.currentQuery() }.lastOrNull { it.params[Route.Param.COMPONENT_CLASS] == componentClass && it.params[Route.Param.COMPONENT_TAG] == componentTag } ?: return mapOf()
-        val params = query.params.toMutableMap()
-        params.remove(Route.Param.COMPONENT_CLASS)
-        params.remove(Route.Param.COMPONENT_TAG)
-        params.remove(Route.Param.FRAGMENT_CONTAINER)
-        return params.toMap()
+    internal fun paramsForComponentFromCurrentNotPendingQuery(componentClass: KClass<*>, componentTag: String): Map<String, Any> {
+        for (route in routes) {
+            val query = route.currentQuery() ?: continue
+            if (query.params[Route.Param.COMPONENT_CLASS] == componentClass &&
+                    query.params[Route.Param.COMPONENT_TAG] == componentTag && !query.pending) {
+                return query.aquireParams()
+            }
+        }
+        return mapOf()
+    }
+
+    @Synchronized
+    internal fun paramsForComponentFromLastPendingQuery(componentClass: KClass<*>, componentTag: String): Map<String, Any> {
+        for (route in routes) {
+            val query = route.lastRoutedQuery() ?: continue
+            if (query.params[Route.Param.COMPONENT_CLASS] == componentClass &&
+                    query.params[Route.Param.COMPONENT_TAG] == componentTag && query.pending) {
+                val params = query.aquireParams()
+                if (route.isFinished()) {
+                    finishRoute(route)
+                }
+                return params
+            }
+        }
+        return mapOf()
     }
 
     @Synchronized
