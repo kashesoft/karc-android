@@ -17,10 +17,7 @@ import com.kashesoft.karc.core.presenter.Presenter
 import com.kashesoft.karc.core.router.Query
 import com.kashesoft.karc.core.router.Routable
 import com.kashesoft.karc.core.router.Route
-import com.kashesoft.karc.utils.Layout
-import com.kashesoft.karc.utils.Logging
-import com.kashesoft.karc.utils.profileObjectDidCreate
-import com.kashesoft.karc.utils.profileObjectWillDestroy
+import com.kashesoft.karc.utils.*
 import kotlin.reflect.KClass
 
 abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<P>? = null) : DialogFragment(),
@@ -36,6 +33,16 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
     @Suppress("UNCHECKED_CAST")
     private val viewModel: ViewModel<P>
         get() = ViewModelProviders.of(this).get(ViewModel::class.java) as ViewModel<P>
+
+    private val layoutListener = withWeakThis { weakThis ->
+        object : ViewTreeObserver.OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                val strongThis = weakThis.get() ?: return
+                strongThis.stopListeningLayout()
+                strongThis.onLayout()
+            }
+        }
+    }
 
     //region <==========|Lifecycle|==========>
 
@@ -64,7 +71,7 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
         log("onViewCreated")
         super.onViewCreated(view, savedInstanceState)
         onLoad()
-        listenLayout()
+        startListeningLayout()
         attachCompanionPresenter()
     }
 
@@ -101,6 +108,7 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
     @CallSuper
     override fun onDestroyView() {
         log("onDestroyView")
+        stopListeningLayout()
         super.onDestroyView()
         detachCompanionPresenter()
     }
@@ -117,13 +125,12 @@ abstract class DialogFragment<P : Presenter>(private val presenterClass: KClass<
         return inflater.inflate(layoutResId, container, false)
     }
 
-    private fun listenLayout() {
-        view?.viewTreeObserver?.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                view?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
-                onLayout()
-            }
-        })
+    private fun startListeningLayout() {
+        view?.viewTreeObserver?.addOnGlobalLayoutListener(layoutListener)
+    }
+
+    private fun stopListeningLayout() {
+        view?.viewTreeObserver?.removeOnGlobalLayoutListener(layoutListener)
     }
 
     private fun onLoad() {
